@@ -3,14 +3,26 @@
  * Shows per-site stats and allows unblocking specific items
  */
 
-// State
+// Global state
 let currentTab = null;
 let currentHostname = '';
 let isEnabled = true;
 let siteBlocked = [];
 let siteExceptions = [];
+let currentTabStats = null;
 
 // Initialize
+// Security: HTML Sanitizer
+function escapeHTML(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   await initialize();
   setupEventListeners();
@@ -44,6 +56,7 @@ async function initialize() {
     
   } catch (error) {
     console.error('Init error:', error);
+    showToast('Failed to initialize', 'error');
   }
 }
 
@@ -52,7 +65,7 @@ async function initialize() {
  */
 async function loadStatus() {
   try {
-    const response = await chrome.runtime.sendMessage({ action: 'getStatus' });
+    const response = await safeSendMessage({ action: 'getStatus' });
     
     if (response) {
       isEnabled = response.isEnabled !== false;
@@ -61,6 +74,7 @@ async function loadStatus() {
     }
   } catch (error) {
     console.error('Status error:', error);
+    showToast('Failed to load status', 'error');
   }
 }
 
@@ -70,7 +84,7 @@ async function loadStatus() {
 async function loadSiteData() {
   try {
     // Check if site is whitelisted
-    const response = await chrome.runtime.sendMessage({ action: 'getSettings' });
+    const response = await safeSendMessage({ action: 'getSettings' });
     const settings = response?.settings || {};
     const whitelist = settings.whitelist || [];
     
@@ -85,6 +99,7 @@ async function loadSiteData() {
     
   } catch (error) {
     console.error('Site data error:', error);
+    showToast('Failed to load site data', 'error');
   }
 }
 
@@ -94,7 +109,7 @@ async function loadSiteData() {
 async function loadBlockedItems() {
   try {
     // Get blocked items from background using tab ID for accuracy
-    const response = await chrome.runtime.sendMessage({ 
+    const response = await safeSendMessage({ 
       action: 'getTabBlocked',
       tabId: currentTab?.id,
       hostname: currentHostname
@@ -103,9 +118,10 @@ async function loadBlockedItems() {
     if (response?.blockedItems) {
       siteBlocked = response.blockedItems;
       siteExceptions = response.exceptions || [];
+      currentTabStats = response.tabStats || null;
     } else {
       // Fallback: get from statistics and filter
-      const statsResponse = await chrome.runtime.sendMessage({ action: 'getStatistics' });
+      const statsResponse = await safeSendMessage({ action: 'getStatistics' });
       const blockLog = statsResponse?.blockLog || [];
       
       // Filter for current tab or hostname
@@ -129,11 +145,12 @@ async function loadBlockedItems() {
     // Update blocked list
     updateBlockedList();
     
-    // Update count in tab
-    document.getElementById('blockedCount').textContent = siteBlocked.length;
+    // Update count in tab (fallback to length if stats missing)
+    document.getElementById('blockedCount').textContent = currentTabStats ? currentTabStats.total : siteBlocked.length;
     
   } catch (error) {
     console.error('Blocked items error:', error);
+    showToast('Failed to load blocked items', 'error');
   }
 }
 
@@ -161,12 +178,12 @@ function updateSiteStatus(isWhitelisted) {
   if (isWhitelisted) {
     statusDot.className = 'status-dot inactive';
     statusText.textContent = 'Not Protected (Whitelisted)';
-    toggleIcon.textContent = '✗';
+    toggleIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
     toggleBtn.classList.add('whitelisted');
   } else {
     statusDot.className = 'status-dot active';
     statusText.textContent = 'Protected';
-    toggleIcon.textContent = '✓';
+    toggleIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
     toggleBtn.classList.remove('whitelisted');
   }
 }
@@ -185,10 +202,19 @@ function updateGlobalStats(stats) {
  * Update page-specific stats
  */
 function updatePageStats() {
-  const total = siteBlocked.length;
-  const ads = siteBlocked.filter(i => i.type === 'ad').length;
-  const trackers = siteBlocked.filter(i => i.type === 'tracker').length;
-  const other = total - ads - trackers;
+  let total = 0, ads = 0, trackers = 0, other = 0;
+  
+  if (currentTabStats) {
+    total = currentTabStats.total || 0;
+    ads = currentTabStats.ad || 0;
+    trackers = currentTabStats.tracker || 0;
+    other = currentTabStats.other || 0;
+  } else {
+    total = siteBlocked.length;
+    ads = siteBlocked.filter(i => i.type === 'ad').length;
+    trackers = siteBlocked.filter(i => i.type === 'tracker').length;
+    other = total - ads - trackers;
+  }
   
   document.getElementById('pageTotal').textContent = total;
   document.getElementById('pageAds').textContent = ads;
@@ -217,19 +243,20 @@ function updateBlockedList(filter = 'all') {
   
   let html = '';
   recent.forEach((item, index) => {
-    const domain = extractDomain(item.url);
-    const typeClass = item.type || 'unknown';
-    const typeLabel = (item.type || 'unknown').charAt(0).toUpperCase() + (item.type || 'unknown').slice(1);
-    const shortUrl = item.url.length > 60 ? item.url.substring(0, 60) + '...' : item.url;
+    const domain = escapeHTML(extractDomain(item.url));
+    const typeClass = escapeHTML(item.type || 'unknown');
+    const typeLabel = escapeHTML((item.type || 'unknown').charAt(0).toUpperCase() + (item.type || 'unknown').slice(1));
+    const safeUrl = escapeHTML(item.url);
+    const shortUrl = escapeHTML(item.url.length > 60 ? item.url.substring(0, 60) + '...' : item.url);
     
     html += `
       <div class="blocked-item" data-index="${index}">
         <div class="blocked-item-header">
           <span class="blocked-type ${typeClass}">${typeLabel}</span>
           <span class="blocked-domain">${domain}</span>
-          <button class="unblock-btn" data-url="${encodeURIComponent(item.url)}" title="Allow this">✓</button>
+          <button class="unblock-btn" data-url="${encodeURIComponent(item.url)}" title="Allow this"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></button>
         </div>
-        <div class="blocked-url" title="${item.url}">${shortUrl}</div>
+        <div class="blocked-url" title="${safeUrl}">${shortUrl}</div>
       </div>
     `;
   });
@@ -259,11 +286,12 @@ function updateExceptionsList() {
   
   let html = '';
   siteExceptions.forEach((exception, index) => {
-    const shortUrl = exception.length > 50 ? exception.substring(0, 50) + '...' : exception;
+    const safeException = escapeHTML(exception);
+    const shortUrl = escapeHTML(exception.length > 50 ? exception.substring(0, 50) + '...' : exception);
     html += `
       <div class="exception-item">
-        <span class="exception-url" title="${exception}">${shortUrl}</span>
-        <button class="remove-exception-btn" data-index="${index}" title="Remove">✗</button>
+        <span class="exception-url" title="${safeException}">${shortUrl}</span>
+        <button class="remove-exception-btn" data-index="${index}" title="Remove"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
     `;
   });
@@ -284,7 +312,7 @@ function updateExceptionsList() {
 async function addException(url) {
   try {
     // Send to background to create dynamic allow rule
-    const response = await chrome.runtime.sendMessage({
+    const response = await safeSendMessage({
       action: 'addException',
       hostname: currentHostname,
       url: url
@@ -298,7 +326,7 @@ async function addException(url) {
       const key = `exceptions_${currentHostname}`;
       await chrome.storage.local.set({ [key]: siteExceptions });
       
-      showToast('✓ Exception added! Reload page to apply.');
+      showToast('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Exception added! Reload page to apply.');
     }
   } catch (error) {
     console.error('Add exception error:', error);
@@ -314,7 +342,7 @@ async function removeException(index) {
     const url = siteExceptions[index];
     
     // Send to background to remove dynamic allow rule
-    const response = await chrome.runtime.sendMessage({
+    const response = await safeSendMessage({
       action: 'removeException',
       hostname: currentHostname,
       url: url
@@ -328,7 +356,7 @@ async function removeException(index) {
       const key = `exceptions_${currentHostname}`;
       await chrome.storage.local.set({ [key]: siteExceptions });
       
-      showToast('✓ Exception removed! Reload page to apply.');
+      showToast('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Exception removed! Reload page to apply.');
     }
   } catch (error) {
     console.error('Remove exception error:', error);
@@ -354,7 +382,7 @@ function extractPattern(url) {
 function setupEventListeners() {
   // Power button
   document.getElementById('powerBtn').addEventListener('click', async () => {
-    const response = await chrome.runtime.sendMessage({ action: 'toggleProtection' });
+    const response = await safeSendMessage({ action: 'toggleProtection' });
     if (response) {
       isEnabled = response.isEnabled;
       updatePowerButton();
@@ -371,18 +399,18 @@ function setupEventListeners() {
   
   // Site toggle (whitelist)
   document.getElementById('siteToggleBtn').addEventListener('click', async () => {
-    const response = await chrome.runtime.sendMessage({ action: 'getSettings' });
+    const response = await safeSendMessage({ action: 'getSettings' });
     const settings = response?.settings || {};
     const whitelist = settings.whitelist || [];
     const isWhitelisted = whitelist.includes(currentHostname);
     
     if (isWhitelisted) {
-      await chrome.runtime.sendMessage({ 
+      await safeSendMessage({ 
         action: 'removeFromWhitelist', 
         domain: currentHostname 
       });
     } else {
-      await chrome.runtime.sendMessage({ 
+      await safeSendMessage({ 
         action: 'addToWhitelist', 
         domain: currentHostname 
       });
@@ -427,7 +455,7 @@ function setupEventListeners() {
     if (toggle) {
       toggle.addEventListener('change', async (e) => {
         const key = setting === 'Fingerprint' ? 'antiFingerprint' : `block${setting}`;
-        await chrome.runtime.sendMessage({
+        await safeSendMessage({
           action: 'updateSettings',
           settings: { [key]: e.target.checked }
         });
@@ -446,7 +474,7 @@ function setupEventListeners() {
   
   document.getElementById('resetStats').addEventListener('click', async () => {
     if (confirm('Reset all statistics?')) {
-      await chrome.runtime.sendMessage({ action: 'resetStatistics' });
+      await safeSendMessage({ action: 'resetStatistics' });
       await loadStatus();
       await loadBlockedItems();
       showToast('Statistics reset');
@@ -483,14 +511,16 @@ function setupTabs() {
 /**
  * Show toast message
  */
-function showToast(message) {
+function showToast(message, type = 'success') {
   // Remove existing toast
   const existing = document.querySelector('.toast');
   if (existing) existing.remove();
   
   const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.textContent = message;
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = message;
+  if (type === 'error') toast.style.background = '#ef4444';
+  if (type === 'warning') toast.style.background = '#f59e0b';
   document.body.appendChild(toast);
   
   setTimeout(() => toast.classList.add('show'), 10);

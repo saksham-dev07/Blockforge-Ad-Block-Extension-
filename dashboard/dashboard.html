@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BlockForge Dashboard</title>
   <link rel="stylesheet" href="dashboard.css">
+
+  <!-- Premium Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="dashboard">
@@ -12,7 +17,7 @@
     <header class="dashboard-header">
       <div class="header-content">
         <div class="logo">
-          <div class="logo-icon">🛡️</div>
+          <div class="logo-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
           <div class="logo-text">
             <h1>BlockForge Dashboard</h1>
             <span class="logo-subtitle">Advanced Protection Analytics</span>
@@ -23,9 +28,9 @@
             <span class="live-dot"></span>
             <span>Live</span>
           </div>
-          <button class="btn btn-secondary" id="refreshBtn">🔄 Refresh</button>
-          <button class="btn btn-secondary" id="exportData">📥 Export</button>
-          <button class="btn btn-primary" id="settingsBtn">⚙️ Settings</button>
+          <button class="btn btn-secondary" id="refreshBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Refresh</button>
+          <button class="btn btn-secondary" id="exportData"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Export</button>
+          <button class="btn btn-primary" id="settingsBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg> Settings</button>
         </div>
       </div>
     </header>
@@ -37,38 +42,38 @@
       <section class="stats-grid primary-stats">
         <div class="stat-card featured">
           <div class="stat-icon-wrap">
-            <div class="stat-icon">🛡️</div>
+            <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
             <div class="stat-ring"></div>
           </div>
           <div class="stat-content">
             <div class="stat-value" id="totalBlocked">0</div>
             <div class="stat-label">Total Threats Blocked</div>
             <div class="stat-trend" id="totalTrend">
-              <span class="trend-icon">📈</span>
+              <span class="trend-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></span>
               <span class="trend-text">--</span>
             </div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon">📢</div>
+          <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></div>
           <div class="stat-value" id="adsBlocked">0</div>
           <div class="stat-label">Ads Blocked</div>
           <div class="stat-percent" id="adsPercent">0%</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon">👁️</div>
+          <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></div>
           <div class="stat-value" id="trackersBlocked">0</div>
           <div class="stat-label">Trackers Stopped</div>
           <div class="stat-percent" id="trackersPercent">0%</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon">⛏️</div>
+          <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14l-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 11"></path><path d="M17.64 15L22 10.64"></path><path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25v-.86L16.01 4.6a5.56 5.56 0 0 0-3.94-1.64H11.2l-2.8 2.8c-.8.8-.8 2.1 0 2.9l8 8c.8.8 2.1.8 2.9 0l1.6-1.6c.8-.8.8-2.1 0-2.9Z"></path></svg></div>
           <div class="stat-value" id="minersBlocked">0</div>
           <div class="stat-label">Crypto Miners</div>
           <div class="stat-percent" id="minersPercent">0%</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon">☠️</div>
+          <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
           <div class="stat-value" id="malwareBlocked">0</div>
           <div class="stat-label">Malware Blocked</div>
           <div class="stat-percent" id="malwarePercent">0%</div>
@@ -78,32 +83,32 @@
       <!-- Performance Stats -->
       <section class="stats-grid secondary-stats">
         <div class="stat-card mini">
-          <div class="stat-icon">💾</div>
+          <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg></div>
           <div class="stat-value" id="dataSaved">0 B</div>
           <div class="stat-label">Data Saved</div>
         </div>
         <div class="stat-card mini">
-          <div class="stat-icon">⚡</div>
+          <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
           <div class="stat-value" id="timeSaved">0s</div>
           <div class="stat-label">Time Saved</div>
         </div>
         <div class="stat-card mini">
-          <div class="stat-icon">🌐</div>
+          <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></div>
           <div class="stat-value" id="sitesVisited">0</div>
           <div class="stat-label">Sites Protected</div>
         </div>
         <div class="stat-card mini">
-          <div class="stat-icon">📊</div>
+          <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg></div>
           <div class="stat-value" id="avgPerPage">0</div>
           <div class="stat-label">Avg Blocks/Page</div>
         </div>
         <div class="stat-card mini">
-          <div class="stat-icon">🔥</div>
+          <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg></div>
           <div class="stat-value" id="blocksToday">0</div>
           <div class="stat-label">Blocked Today</div>
         </div>
         <div class="stat-card mini">
-          <div class="stat-icon">📅</div>
+          <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
           <div class="stat-value" id="activeDays">0</div>
           <div class="stat-label">Days Active</div>
         </div>
@@ -114,7 +119,7 @@
         <!-- Category Breakdown -->
         <div class="card">
           <div class="card-header">
-            <h2>📊 Threat Category Breakdown</h2>
+            <h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg> Threat Category Breakdown</h2>
             <div class="card-actions">
               <select id="categoryTimeRange" class="mini-select" title="Time range">
                 <option value="all">All Time</option>
@@ -133,7 +138,7 @@
         <!-- Weekly Trends -->
         <div class="card">
           <div class="card-header">
-            <h2>📈 Blocking Trends</h2>
+            <h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg> Blocking Trends</h2>
             <div class="card-actions">
               <select id="trendsRange" class="mini-select" title="Trend range">
                 <option value="7">Last 7 Days</option>
@@ -163,7 +168,7 @@
         <!-- Block Type Distribution -->
         <div class="card">
           <div class="card-header">
-            <h2>🎯 Protection Summary</h2>
+            <h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg> Protection Summary</h2>
           </div>
           <div class="card-body">
             <div class="protection-summary" id="protectionSummary">
@@ -178,7 +183,7 @@
         <!-- Top Blocked Domains -->
         <div class="card">
           <div class="card-header">
-            <h2>🚫 Top Blocked Domains</h2>
+            <h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg> Top Blocked Domains</h2>
             <span class="card-badge" id="totalDomains">0 domains</span>
           </div>
           <div class="card-body scrollable" id="topDomains">
@@ -189,7 +194,7 @@
         <!-- Recent Blocks -->
         <div class="card">
           <div class="card-header">
-            <h2>📋 Recent Blocks</h2>
+            <h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg> Recent Blocks</h2>
             <span class="card-badge" id="totalBlocksBadge">0 blocks</span>
           </div>
           <div class="card-body scrollable" id="recentBlocks">
@@ -200,7 +205,7 @@
         <!-- Top Sites Protected -->
         <div class="card">
           <div class="card-header">
-            <h2>🌐 Most Protected Sites</h2>
+            <h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg> Most Protected Sites</h2>
           </div>
           <div class="card-body scrollable" id="topSites">
             <div class="no-data">Loading...</div>
@@ -224,7 +229,7 @@
       <section class="privacy-section">
         <div class="card privacy-card">
           <div class="card-header">
-            <h2>🔒 Privacy Protection Score</h2>
+            <h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Privacy Protection Score</h2>
           </div>
           <div class="card-body">
             <div class="privacy-score-container" id="privacyScore">
@@ -260,8 +265,8 @@
 
       <!-- Actions -->
       <section class="actions-section">
-        <button class="btn btn-secondary" id="clearLogBtn">🧹 Clear Log</button>
-        <button class="btn btn-danger" id="resetStats">🗑️ Reset All Statistics</button>
+        <button class="btn btn-secondary" id="clearLogBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Clear Log</button>
+        <button class="btn btn-danger" id="resetStats"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Reset All Statistics</button>
       </section>
     </main>
 
@@ -277,6 +282,7 @@
     </footer>
   </div>
 
+  <script src="../shared/utils.js"></script>
   <script src="dashboard.js"></script>
 </body>
 </html>

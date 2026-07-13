@@ -1,3 +1,4 @@
+
 /**
  * BlockForge - Settings Page Script
  * 
@@ -23,6 +24,17 @@ let customRules = [];
 // INITIALIZATION
 // ============================================================================
 
+// Security: HTML Sanitizer
+function escapeHTML(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   await loadAllData();
   setupNavigation();
@@ -36,22 +48,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadAllData() {
   try {
     // Get settings
-    const settingsResponse = await chrome.runtime.sendMessage({ type: 'GET_SETTINGS' });
+    const settingsResponse = await safeSendMessage({ type: 'GET_SETTINGS' });
     settings = settingsResponse?.settings || settingsResponse || {};
     
     // Get filter lists
-    const filtersResponse = await chrome.runtime.sendMessage({ type: 'GET_FILTER_LISTS' });
+    const filtersResponse = await safeSendMessage({ type: 'GET_FILTER_LISTS' });
     filterLists = Array.isArray(filtersResponse) ? filtersResponse : 
                   Array.isArray(filtersResponse?.filterLists) ? filtersResponse.filterLists : 
                   getDefaultFilterLists();
     
     // Get custom rules
-    const rulesResponse = await chrome.runtime.sendMessage({ type: 'GET_CUSTOM_RULES' });
+    const rulesResponse = await safeSendMessage({ type: 'GET_CUSTOM_RULES' });
     customRules = Array.isArray(rulesResponse) ? rulesResponse : 
                   Array.isArray(rulesResponse?.rules) ? rulesResponse.rules : [];
     
     // Get global stats for about section
-    const statsResponse = await chrome.runtime.sendMessage({ type: 'GET_GLOBAL_STATS' });
+    const statsResponse = await safeSendMessage({ type: 'GET_GLOBAL_STATS' });
     if (statsResponse) {
       updateAboutStats(statsResponse);
     }
@@ -284,7 +296,7 @@ async function updateSetting(key, value) {
   settings[key] = value;
   
   try {
-    await chrome.runtime.sendMessage({
+    await safeSendMessage({
       type: 'UPDATE_SETTINGS',
       settings: { [key]: value }
     });
@@ -340,7 +352,7 @@ async function selectBlockingLevel(level) {
     setToggle(`setting${key.charAt(0).toUpperCase() + key.slice(1)}`, value);
   }
   
-  await chrome.runtime.sendMessage({
+  await safeSendMessage({
     type: 'UPDATE_SETTINGS',
     settings: levelConfig
   });
@@ -391,7 +403,7 @@ function renderFilterLists() {
  */
 async function toggleFilterList(id, enabled) {
   try {
-    await chrome.runtime.sendMessage({
+    await safeSendMessage({
       type: 'TOGGLE_FILTER_LIST',
       id,
       enabled
@@ -414,13 +426,13 @@ async function toggleFilterList(id, enabled) {
 async function updateFilterLists() {
   const btn = document.getElementById('updateFiltersBtn');
   btn.disabled = true;
-  btn.innerHTML = '<span>⏳</span> Updating...';
+  btn.innerHTML = '<span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg></span> Updating...';
   
   try {
-    await chrome.runtime.sendMessage({ type: 'UPDATE_FILTER_LISTS' });
+    await safeSendMessage({ type: 'UPDATE_FILTER_LISTS' });
     
     // Reload filter lists
-    const response = await chrome.runtime.sendMessage({ type: 'GET_FILTER_LISTS' });
+    const response = await safeSendMessage({ type: 'GET_FILTER_LISTS' });
     filterLists = response || [];
     renderFilterLists();
     
@@ -431,7 +443,7 @@ async function updateFilterLists() {
     showToast('Failed to update filter lists', 'error');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<span>🔄</span> Update All Lists';
+    btn.innerHTML = '<span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></span> Update All Lists';
   }
 }
 
@@ -445,7 +457,7 @@ async function addCustomList() {
   if (!url) return;
   
   try {
-    await chrome.runtime.sendMessage({
+    await safeSendMessage({
       type: 'ADD_CUSTOM_FILTER_LIST',
       url
     });
@@ -453,7 +465,7 @@ async function addCustomList() {
     input.value = '';
     
     // Reload filter lists
-    const response = await chrome.runtime.sendMessage({ type: 'GET_FILTER_LISTS' });
+    const response = await safeSendMessage({ type: 'GET_FILTER_LISTS' });
     filterLists = response || [];
     renderFilterLists();
     
@@ -480,12 +492,16 @@ function renderWhitelist() {
     return;
   }
   
-  container.innerHTML = whitelist.map(domain => `
-    <div class="domain-item" data-domain="${domain}">
-      <span class="domain-name">${domain}</span>
-      <button class="domain-remove" onclick="removeFromWhitelist('${domain}')">✕</button>
+  container.innerHTML = whitelist.map(domain => {
+    const safeDomain = escapeHTML(domain);
+    return `
+    <div class="list-item">
+      <span class="domain-name" title="${safeDomain}">${safeDomain}</span>
+      <button class="icon-btn remove-btn" onclick="removeFromWhitelist('${safeDomain}')" title="Remove">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
     </div>
-  `).join('');
+  `}).join('');
 }
 
 /**
@@ -504,7 +520,7 @@ async function addToWhitelist() {
   whitelist.push(domain);
   
   try {
-    await chrome.runtime.sendMessage({
+    await safeSendMessage({
       type: 'WHITELIST_SITE',
       hostname: domain,
       add: true
@@ -525,7 +541,7 @@ async function addToWhitelist() {
  */
 window.removeFromWhitelist = async function(domain) {
   try {
-    await chrome.runtime.sendMessage({
+    await safeSendMessage({
       type: 'WHITELIST_SITE',
       hostname: domain,
       add: false
@@ -552,12 +568,16 @@ function renderBlacklist() {
     return;
   }
   
-  container.innerHTML = blacklist.map(domain => `
-    <div class="domain-item" data-domain="${domain}">
-      <span class="domain-name">${domain}</span>
-      <button class="domain-remove" onclick="removeFromBlacklist('${domain}')">✕</button>
+  container.innerHTML = blacklist.map(domain => {
+    const safeDomain = escapeHTML(domain);
+    return `
+    <div class="list-item">
+      <span class="domain-name" title="${safeDomain}">${safeDomain}</span>
+      <button class="icon-btn remove-btn" onclick="removeFromBlacklist('${safeDomain}')" title="Remove">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
     </div>
-  `).join('');
+  `}).join('');
 }
 
 /**
@@ -576,7 +596,7 @@ async function addToBlacklist() {
   blacklist.push(domain);
   
   try {
-    await chrome.runtime.sendMessage({
+    await safeSendMessage({
       type: 'BLACKLIST_SITE',
       hostname: domain,
       add: true
@@ -597,7 +617,7 @@ async function addToBlacklist() {
  */
 window.removeFromBlacklist = async function(domain) {
   try {
-    await chrome.runtime.sendMessage({
+    await safeSendMessage({
       type: 'BLACKLIST_SITE',
       hostname: domain,
       add: false
@@ -631,7 +651,7 @@ function renderCustomRules() {
   container.innerHTML = customRules.map(rule => `
     <div class="rule-item" data-id="${rule.id}">
       <span class="rule-text">${rule.pattern || rule.originalRule || rule}</span>
-      <button class="domain-remove" onclick="removeCustomRule(${rule.id})">✕</button>
+      <button class="domain-remove" onclick="removeCustomRule(${rule.id})"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
     </div>
   `).join('');
 }
@@ -649,7 +669,7 @@ async function addCustomRules() {
   
   try {
     for (const rule of rules) {
-      await chrome.runtime.sendMessage({
+      await safeSendMessage({
         type: 'ADD_CUSTOM_RULE',
         rule: { pattern: rule.trim(), type: 'block' }
       });
@@ -658,7 +678,7 @@ async function addCustomRules() {
     input.value = '';
     
     // Reload rules
-    const response = await chrome.runtime.sendMessage({ type: 'GET_CUSTOM_RULES' });
+    const response = await safeSendMessage({ type: 'GET_CUSTOM_RULES' });
     customRules = response || [];
     renderCustomRules();
     
@@ -674,7 +694,7 @@ async function addCustomRules() {
  */
 window.removeCustomRule = async function(ruleId) {
   try {
-    await chrome.runtime.sendMessage({
+    await safeSendMessage({
       type: 'REMOVE_CUSTOM_RULE',
       ruleId
     });
@@ -697,7 +717,7 @@ window.removeCustomRule = async function(ruleId) {
  */
 async function exportSettings() {
   try {
-    const response = await chrome.runtime.sendMessage({ type: 'EXPORT_SETTINGS' });
+    const response = await safeSendMessage({ type: 'EXPORT_SETTINGS' });
     
     const blob = new Blob([JSON.stringify(response, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -728,7 +748,7 @@ async function importSettings(event) {
     const text = await file.text();
     const data = JSON.parse(text);
     
-    await chrome.runtime.sendMessage({
+    await safeSendMessage({
       type: 'IMPORT_SETTINGS',
       data
     });
@@ -760,7 +780,7 @@ async function resetStatistics() {
   }
   
   try {
-    await chrome.runtime.sendMessage({ type: 'RESET_STATISTICS' });
+    await safeSendMessage({ type: 'RESET_STATISTICS' });
     showToast('Statistics reset');
     
     // Update about section
@@ -781,7 +801,7 @@ async function clearAllData() {
   }
   
   try {
-    await chrome.runtime.sendMessage({ type: 'CLEAR_ALL_DATA' });
+    await safeSendMessage({ type: 'CLEAR_ALL_DATA' });
     showToast('All data cleared');
     
     // Reload page
@@ -801,7 +821,7 @@ async function resetToDefaults() {
   }
   
   try {
-    await chrome.runtime.sendMessage({ type: 'RESET_TO_DEFAULTS' });
+    await safeSendMessage({ type: 'RESET_TO_DEFAULTS' });
     showToast('Settings reset to defaults');
     
     // Reload all data
@@ -887,13 +907,13 @@ function showToast(message, type = 'success') {
   
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
-  toast.textContent = message;
+  toast.innerHTML = message;
   toast.style.cssText = `
     position: fixed;
     bottom: 20px;
     right: 20px;
     padding: 12px 24px;
-    background: ${type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#10b981'};
+    background: ${type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#2563eb'};
     color: white;
     border-radius: 8px;
     font-size: 14px;

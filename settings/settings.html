@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BlockForge Settings</title>
   <link rel="stylesheet" href="settings.css">
+
+  <!-- Premium Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="settings-container">
@@ -15,8 +20,8 @@
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
             <defs>
               <linearGradient id="shield-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#10b981"/>
-                <stop offset="100%" style="stop-color:#059669"/>
+                <stop offset="0%" style="stop-color:#2563eb"/>
+                <stop offset="100%" style="stop-color:#1d4ed8"/>
               </linearGradient>
             </defs>
             <path d="M16 2L4 7V14.5C4 21.5 9 27.5 16 30C23 27.5 28 21.5 28 14.5V7L16 2Z" fill="url(#shield-gradient)"/>
@@ -28,49 +33,49 @@
       
       <nav class="sidebar-nav">
         <a href="#general" class="nav-item active" data-section="general">
-          <span class="nav-icon">⚙️</span>
+          <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
           <span class="nav-text">General</span>
         </a>
         <a href="#blocking" class="nav-item" data-section="blocking">
-          <span class="nav-icon">🛡️</span>
+          <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></span>
           <span class="nav-text">Blocking</span>
         </a>
         <a href="#privacy" class="nav-item" data-section="privacy">
-          <span class="nav-icon">🔒</span>
+          <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>
           <span class="nav-text">Privacy</span>
         </a>
         <a href="#filters" class="nav-item" data-section="filters">
-          <span class="nav-icon">📋</span>
+          <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></span>
           <span class="nav-text">Filter Lists</span>
         </a>
         <a href="#whitelist" class="nav-item" data-section="whitelist">
-          <span class="nav-icon">✅</span>
+          <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></span>
           <span class="nav-text">Whitelist</span>
         </a>
         <a href="#blacklist" class="nav-item" data-section="blacklist">
-          <span class="nav-icon">🚫</span>
+          <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg></span>
           <span class="nav-text">Blacklist</span>
         </a>
         <a href="#custom-rules" class="nav-item" data-section="custom-rules">
-          <span class="nav-icon">✏️</span>
+          <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></span>
           <span class="nav-text">Custom Rules</span>
         </a>
         <a href="#advanced" class="nav-item" data-section="advanced">
-          <span class="nav-icon">🔧</span>
+          <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg></span>
           <span class="nav-text">Advanced</span>
         </a>
         <a href="#about" class="nav-item" data-section="about">
-          <span class="nav-icon">ℹ️</span>
+          <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></span>
           <span class="nav-text">About</span>
         </a>
       </nav>
       
       <div class="sidebar-footer">
         <button class="btn-export" id="exportBtn">
-          <span>📤</span> Export Settings
+          <span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></span> Export Settings
         </button>
         <button class="btn-import" id="importBtn">
-          <span>📥</span> Import Settings
+          <span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span> Import Settings
         </button>
         <input type="file" id="importFile" accept=".json" hidden>
       </div>
@@ -149,10 +154,10 @@
               <h3 class="level-name">Minimal</h3>
               <p class="level-description">Block only malware and cryptominers. Best compatibility.</p>
               <ul class="level-features">
-                <li>✅ Malware protection</li>
-                <li>✅ Cryptominer blocking</li>
-                <li>❌ Ad blocking</li>
-                <li>❌ Tracker blocking</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Malware protection</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Cryptominer blocking</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Ad blocking</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Tracker blocking</li>
               </ul>
             </div>
             
@@ -161,22 +166,22 @@
               <h3 class="level-name">Moderate</h3>
               <p class="level-description">Block ads, trackers, and threats. Recommended for most users.</p>
               <ul class="level-features">
-                <li>✅ Malware protection</li>
-                <li>✅ Cryptominer blocking</li>
-                <li>✅ Ad blocking</li>
-                <li>✅ Tracker blocking</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Malware protection</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Cryptominer blocking</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Ad blocking</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Tracker blocking</li>
               </ul>
             </div>
             
             <div class="level-card" data-level="aggressive">
-              <div class="level-icon">🔴</div>
+              <div class="level-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg></div>
               <h3 class="level-name">Aggressive</h3>
               <p class="level-description">Maximum protection. May break some websites.</p>
               <ul class="level-features">
-                <li>✅ All protections</li>
-                <li>✅ First-party blocking</li>
-                <li>✅ Cookie blocking</li>
-                <li>✅ JavaScript blocking</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> All protections</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> First-party blocking</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Cookie blocking</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> JavaScript blocking</li>
               </ul>
             </div>
           </div>
@@ -362,7 +367,7 @@
         
         <div class="filter-actions">
           <button class="btn-primary" id="updateFiltersBtn">
-            <span>🔄</span> Update All Lists
+            <span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></span> Update All Lists
           </button>
           <span class="last-updated" id="lastUpdated">Last updated: Never</span>
         </div>
@@ -506,8 +511,8 @@ example.com##.ad-container"></textarea>
             <svg width="64" height="64" viewBox="0 0 32 32" fill="none">
               <defs>
                 <linearGradient id="shield-gradient-large" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#10b981"/>
-                  <stop offset="100%" style="stop-color:#059669"/>
+                  <stop offset="0%" style="stop-color:#2563eb"/>
+                  <stop offset="100%" style="stop-color:#1d4ed8"/>
                 </linearGradient>
               </defs>
               <path d="M16 2L4 7V14.5C4 21.5 9 27.5 16 30C23 27.5 28 21.5 28 14.5V7L16 2Z" fill="url(#shield-gradient-large)"/>
@@ -537,25 +542,26 @@ example.com##.ad-container"></textarea>
           </div>
           
           <div class="about-links">
-            <a href="#" class="about-link" id="dashboardLink">📊 View Dashboard</a>
-            <a href="#" class="about-link" id="reportLink">🐛 Report Issue</a>
-            <a href="#" class="about-link" id="rateLink">⭐ Rate Extension</a>
+            <a href="#" class="about-link" id="dashboardLink"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg> View Dashboard</a>
+            <a href="#" class="about-link" id="reportLink"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect x="4" y="10" width="16" height="10" rx="2" ry="2"></rect><path d="M10 22v-4"></path><path d="M14 22v-4"></path></svg> Report Issue</a>
+            <a href="#" class="about-link" id="rateLink"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Rate Extension</a>
           </div>
         </div>
         
         <div class="settings-group">
           <h2 class="group-title">Privacy Policy</h2>
           <div class="privacy-info">
-            <p>✅ No data collection - everything stays on your device</p>
-            <p>✅ No external analytics or tracking</p>
-            <p>✅ All processing happens locally</p>
-            <p>✅ Open source and auditable</p>
+            <p><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> No data collection - everything stays on your device</p>
+            <p><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> No external analytics or tracking</p>
+            <p><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> All processing happens locally</p>
+            <p><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Open source and auditable</p>
           </div>
         </div>
       </section>
     </main>
   </div>
 
+  <script src="../shared/utils.js"></script>
   <script src="settings.js"></script>
 </body>
 </html>

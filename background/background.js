@@ -24,9 +24,22 @@ function getDefaultSettings() {
   };
 }
 
+// Default statistics object
+function getDefaultStats() {
+  return {
+    totalBlocked: 0,
+    adsBlocked: 0,
+    trackersBlocked: 0,
+    minersBlocked: 0,
+    malwareBlocked: 0,
+    dataSaved: 0,
+    timeSaved: 0
+  };
+}
+
 // Initialize extension
 async function initialize() {
-  console.log('🛡️ BlockForge initializing...');
+  console.log('[BlockForge] BlockForge initializing...');
   
   try {
     // Load settings
@@ -40,10 +53,10 @@ async function initialize() {
     // Update badge
     await updateBadge();
     
-    console.log('✅ BlockForge initialized successfully');
-    console.log('📊 Protection enabled:', isEnabled);
+    console.log('[BlockForge] BlockForge initialized successfully');
+    console.log('[BlockForge] Protection enabled:', isEnabled);
   } catch (error) {
-    console.error('❌ Initialization error:', error);
+    console.error('[BlockForge] Initialization error:', error);
   }
 }
 
@@ -81,9 +94,73 @@ async function updateRules() {
       enableRulesetIds: enabledRulesets,
       disableRulesetIds: disabledRulesets
     });
-    console.log('📋 Rules updated:', { enabled: enabledRulesets, disabled: disabledRulesets });
+    
+    // Sync dynamic allow rules for whitelisted sites
+    const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
+    
+    // Clear our managed dynamic rules (whitelist 200k+, blacklist 300k+, custom 400k-600k)
+    const managedRuleIds = existingRules
+      .filter(r => (r.id >= 200000 && r.id < 600000))
+      .map(r => r.id);
+    
+    const newDynamicRules = [];
+    
+    if (isEnabled) {
+      // 1. Whitelist (allowAllRequests)
+      if (settings.whitelist) {
+        settings.whitelist.forEach((domain, index) => {
+          if (domain && domain.trim()) {
+            newDynamicRules.push({
+              id: 200000 + index,
+              priority: 99999,
+              action: { type: 'allowAllRequests' },
+              condition: { 
+                requestDomains: [domain.trim()],
+                resourceTypes: ['main_frame', 'sub_frame']
+              }
+            });
+          }
+        });
+      }
+      
+      // 2. Blacklist (block)
+      if (settings.blacklist) {
+        settings.blacklist.forEach((domain, index) => {
+          if (domain && domain.trim()) {
+            newDynamicRules.push({
+              id: 300000 + index,
+              priority: 50000,
+              action: { type: 'block' },
+              condition: { urlFilter: `||${domain.trim()}^` }
+            });
+          }
+        });
+      }
+      
+      // 3. Custom Rules
+      const customData = await chrome.storage.local.get(['customRules']);
+      const customRules = customData.customRules || [];
+      customRules.forEach((rule, index) => {
+        if (rule && rule.pattern) {
+          const isAllow = rule.type === 'allow';
+          newDynamicRules.push({
+            id: (isAllow ? 500000 : 400000) + index,
+            priority: 40000,
+            action: { type: isAllow ? 'allow' : 'block' },
+            condition: { urlFilter: rule.pattern }
+          });
+        }
+      });
+    }
+    
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: managedRuleIds,
+      addRules: newDynamicRules
+    });
+    
+    console.log(`[BlockForge] Rules updated. Synced ${newDynamicRules.length} dynamic rules.`);
   } catch (error) {
-    console.error('❌ Failed to update rules:', error);
+    console.error('[BlockForge] Failed to update rules:', error);
   }
 }
 
@@ -98,7 +175,15 @@ try {
       const url = request.url;
       const tabId = request.tabId;
       
-      console.log('🛡️ Blocked:', url, 'Rule:', rule.ruleId, 'Ruleset:', rule.rulesetId);
+      // Ignore whitelist rules (200000-299999) and custom allow rules (500000+)
+      if (!rule.rulesetId || rule.rulesetId === '_dynamic' || rule.rulesetId === '') {
+        if ((rule.ruleId >= 200000 && rule.ruleId < 300000) || rule.ruleId >= 500000) {
+          return; // This is an allow rule, do not count as a block
+        }
+      }
+      
+      // Debug logging disabled for performance — uncomment to troubleshoot
+      // console.log('[BlockForge] Blocked:', url, 'Rule:', rule.ruleId, 'Ruleset:', rule.rulesetId);
       
       // Determine block type from ruleset
       let blockType = 'ad';
@@ -114,123 +199,131 @@ try {
       if (tabId > 0) {
         chrome.tabs.get(tabId, (tab) => {
           if (chrome.runtime.lastError) {
-            // Tab might be closed, use initiator
-            recordBlock(tabId, url, blockType, sourceUrl);
+            queueBlock(tabId, url, blockType, sourceUrl);
           } else {
-            recordBlock(tabId, url, blockType, tab.url || sourceUrl);
+            queueBlock(tabId, url, blockType, tab.url || sourceUrl);
           }
         });
       } else {
-        // No valid tab, use initiator/documentUrl
-        recordBlock(tabId, url, blockType, sourceUrl);
+        queueBlock(tabId, url, blockType, sourceUrl);
       }
     });
-    console.log('✅ Rule match debug listener registered');
+    console.log('[BlockForge] Rule match debug listener registered');
   } else {
-    console.log('ℹ️ onRuleMatchedDebug not available (normal in production)');
+    console.log('[BlockForge] onRuleMatchedDebug not available (normal in production)');
   }
 } catch (e) {
-  console.log('ℹ️ Could not register debug listener:', e.message);
+  console.log('[BlockForge] Could not register debug listener:', e.message);
 }
 
-// Record a blocked request
-async function recordBlock(tabId, url, type, source) {
+// Memory buffer for batched recording to prevent storage race conditions
+let blockBuffer = [];
+let blockBufferTimer = null;
+
+function queueBlock(tabId, url, type, source) {
+  blockBuffer.push({ tabId, url, type, source, timestamp: Date.now() });
+  
+  if (!blockBufferTimer) {
+    blockBufferTimer = setTimeout(flushBlockBuffer, 1000); // Flush every second
+  }
+}
+
+async function flushBlockBuffer() {
+  blockBufferTimer = null;
+  if (blockBuffer.length === 0) return;
+  
+  // Clone and clear buffer
+  const blocksToProcess = [...blockBuffer];
+  blockBuffer = [];
+  
   try {
-    // Get current statistics
     const data = await chrome.storage.local.get(['statistics', 'dailyStats', 'blockLog']);
     
-    const statistics = data.statistics || {
-      totalBlocked: 0,
-      adsBlocked: 0,
-      trackersBlocked: 0,
-      minersBlocked: 0,
-      malwareBlocked: 0,
-      dataSaved: 0,
-      timeSaved: 0
-    };
+    const statistics = data.statistics || getDefaultStats();
     
     const dailyStats = data.dailyStats || {};
     const blockLog = data.blockLog || [];
-    
-    // Update totals
-    statistics.totalBlocked++;
-    
-    // Update by type
-    switch (type) {
-      case 'ad':
-        statistics.adsBlocked++;
-        statistics.dataSaved += 50000; // ~50KB per ad
-        statistics.timeSaved += 200; // ~200ms
-        break;
-      case 'tracker':
-        statistics.trackersBlocked++;
-        statistics.dataSaved += 5000; // ~5KB
-        statistics.timeSaved += 50;
-        break;
-      case 'miner':
-        statistics.minersBlocked++;
-        statistics.dataSaved += 100000; // Miners are heavy
-        statistics.timeSaved += 1000;
-        break;
-      case 'malware':
-        statistics.malwareBlocked++;
-        statistics.dataSaved += 10000;
-        break;
-    }
-    
-    // Update daily stats
     const today = new Date().toISOString().split('T')[0];
+    
     if (!dailyStats[today]) {
       dailyStats[today] = { ads: 0, trackers: 0, miners: 0, malware: 0, total: 0 };
     }
-    dailyStats[today].total++;
-    if (type === 'ad') dailyStats[today].ads++;
-    else if (type === 'tracker') dailyStats[today].trackers++;
-    else if (type === 'miner') dailyStats[today].miners++;
-    else if (type === 'malware') dailyStats[today].malware++;
     
-    // Keep block log (last 500 entries)
-    blockLog.unshift({
-      url: url.substring(0, 200), // Truncate long URLs
-      type: type,
-      source: source,
-      tabId: tabId,
-      timestamp: Date.now()
-    });
-    
-    if (blockLog.length > 500) {
-      blockLog.length = 500;
+    // Process all items
+    for (const item of blocksToProcess) {
+      statistics.totalBlocked++;
+      dailyStats[today].total++;
+      
+      switch (item.type) {
+        case 'ad':
+          statistics.adsBlocked++; statistics.dataSaved += 50000; statistics.timeSaved += 200;
+          dailyStats[today].ads++; break;
+        case 'tracker':
+          statistics.trackersBlocked++; statistics.dataSaved += 5000; statistics.timeSaved += 50;
+          dailyStats[today].trackers++; break;
+        case 'miner':
+          statistics.minersBlocked++; statistics.dataSaved += 100000; statistics.timeSaved += 1000;
+          dailyStats[today].miners++; break;
+        case 'malware':
+          statistics.malwareBlocked++; statistics.dataSaved += 10000;
+          dailyStats[today].malware++; break;
+      }
+      
+      blockLog.unshift({
+        url: item.url.substring(0, 200),
+        type: item.type,
+        source: item.source,
+        tabId: item.tabId,
+        timestamp: item.timestamp
+      });
     }
     
-    // Save to storage
+    if (blockLog.length > 500) blockLog.length = 500;
+    
     await chrome.storage.local.set({ statistics, dailyStats, blockLog });
     
-    // Update badge for this tab
-    if (tabId > 0) {
-      updateTabBadge(tabId);
+    // Update badges efficiently
+    const tabCounts = new Map();
+    for (const item of blocksToProcess) {
+      if (item.tabId > 0) {
+        const counts = tabCounts.get(item.tabId) || { total: 0, ad: 0, tracker: 0, other: 0 };
+        counts.total++;
+        if (item.type === 'ad') counts.ad++;
+        else if (item.type === 'tracker') counts.tracker++;
+        else counts.other++;
+        tabCounts.set(item.tabId, counts);
+      }
+    }
+    
+    for (const [tId, count] of tabCounts.entries()) {
+      updateTabBadgeBatch(tId, count);
     }
     
   } catch (error) {
-    console.error('❌ Error recording block:', error);
+    console.error('[BlockForge] Buffer flush error:', error);
   }
 }
 
-// Update badge for specific tab
-async function updateTabBadge(tabId) {
+async function updateTabBadgeBatch(tabId, incrementCounts) {
   try {
-    if (!isEnabled) {
-      await chrome.action.setBadgeText({ text: 'OFF', tabId });
-      await chrome.action.setBadgeBackgroundColor({ color: '#666666', tabId });
-      return;
+    if (!isEnabled) return;
+    
+    // Check if incrementCounts is a number (legacy fallback) or object
+    const isObject = typeof incrementCounts === 'object';
+    const incTotal = isObject ? incrementCounts.total : incrementCounts;
+    
+    const current = tabBlockCounts.get(tabId) || { total: 0, ad: 0, tracker: 0, other: 0 };
+    current.total += incTotal;
+    if (isObject) {
+      current.ad += incrementCounts.ad || 0;
+      current.tracker += incrementCounts.tracker || 0;
+      current.other += incrementCounts.other || 0;
     }
     
-    const count = (tabBlockCounts.get(tabId) || 0) + 1;
-    tabBlockCounts.set(tabId, count);
+    tabBlockCounts.set(tabId, current);
     
-    let badgeText = count.toString();
-    if (count >= 1000) {
-      badgeText = Math.floor(count / 1000) + 'k';
-    }
+    let badgeText = current.total.toString();
+    if (current.total >= 1000) badgeText = Math.floor(current.total / 1000) + 'k';
     
     await chrome.action.setBadgeText({ text: badgeText, tabId });
     await chrome.action.setBadgeBackgroundColor({ color: '#00ff88', tabId });
@@ -238,6 +331,8 @@ async function updateTabBadge(tabId) {
     // Tab might be closed
   }
 }
+
+
 
 // Update global badge
 async function updateBadge() {
@@ -294,7 +389,7 @@ function normalizeAction(message) {
 
 async function handleMessage(message, sender) {
   const action = normalizeAction(message);
-  console.log('📨 Message received:', action);
+  console.log('[BlockForge] Message received:', action);
   
   switch (action) {
     case 'injectProtectionScript':
@@ -302,6 +397,16 @@ async function handleMessage(message, sender) {
       // Inject protection script into page context (MAIN world) to bypass CSP
       if (!sender.tab?.id) {
         return { success: false, error: 'No tab ID' };
+      }
+      
+      const targetUrl = sender.url || (sender.tab ? sender.tab.url : '');
+      if (!targetUrl || 
+          targetUrl.startsWith('chrome://') || 
+          targetUrl.startsWith('edge://') || 
+          targetUrl.startsWith('about:') || 
+          targetUrl.startsWith('chrome-extension://') ||
+          targetUrl.startsWith('https://chrome.google.com/webstore')) {
+        return { success: false, error: 'Cannot inject into restricted URLs' };
       }
       
       try {
@@ -370,6 +475,10 @@ async function handleMessage(message, sender) {
         });
         return { success: true };
       } catch (error) {
+        // Suppress scary console errors for expected navigation race conditions
+        if (error.message && (error.message.includes('chrome://') || error.message.includes('edge://') || error.message.includes('about:'))) {
+          return { success: false, error: error.message };
+        }
         console.error('Failed to inject protection script:', error);
         return { success: false, error: error.message };
       }
@@ -379,7 +488,7 @@ async function handleMessage(message, sender) {
     case 'CONTENT_SCRIPT_READY': {
       // Content script is ready, send configuration
       const tabUrl = sender.tab?.url || '';
-      const csrHostname = tabUrl ? new URL(tabUrl).hostname : '';
+      const csrHostname = message.hostname || (tabUrl ? new URL(tabUrl).hostname : '');
       const isWhitelisted = (settings.whitelist || []).includes(csrHostname);
       return {
         success: true,
@@ -395,15 +504,7 @@ async function handleMessage(message, sender) {
       const statusData = await chrome.storage.local.get(['statistics']);
       return {
         isEnabled: isEnabled,
-        statistics: statusData.statistics || {
-          totalBlocked: 0,
-          adsBlocked: 0,
-          trackersBlocked: 0,
-          minersBlocked: 0,
-          malwareBlocked: 0,
-          dataSaved: 0,
-          timeSaved: 0
-        }
+        statistics: statusData.statistics || getDefaultStats()
       };
       
     case 'toggleProtection':
@@ -425,30 +526,14 @@ async function handleMessage(message, sender) {
     case 'getStatistics':
       const statsData = await chrome.storage.local.get(['statistics', 'dailyStats', 'blockLog']);
       return {
-        statistics: statsData.statistics || {
-          totalBlocked: 0,
-          adsBlocked: 0,
-          trackersBlocked: 0,
-          minersBlocked: 0,
-          malwareBlocked: 0,
-          dataSaved: 0,
-          timeSaved: 0
-        },
+        statistics: statsData.statistics || getDefaultStats(),
         dailyStats: statsData.dailyStats || {},
         blockLog: statsData.blockLog || []
       };
       
     case 'resetStatistics':
       await chrome.storage.local.set({
-        statistics: {
-          totalBlocked: 0,
-          adsBlocked: 0,
-          trackersBlocked: 0,
-          minersBlocked: 0,
-          malwareBlocked: 0,
-          dataSaved: 0,
-          timeSaved: 0
-        },
+        statistics: getDefaultStats(),
         dailyStats: {},
         blockLog: []
       });
@@ -460,37 +545,17 @@ async function handleMessage(message, sender) {
       if (!settings.whitelist.includes(message.domain)) {
         settings.whitelist.push(message.domain);
         await chrome.storage.local.set({ settings });
+        await updateRules();
       }
       return { success: true };
       
     case 'removeFromWhitelist':
       settings.whitelist = (settings.whitelist || []).filter(d => d !== message.domain);
       await chrome.storage.local.set({ settings });
+      await updateRules();
       return { success: true };
       
-    case 'getSiteBlocked': {
-      // Get blocked items for a specific hostname
-      const siteData = await chrome.storage.local.get(['blockLog', 'siteExceptions']);
-      const siteBlockLog = siteData.blockLog || [];
-      const siteExceptions = siteData.siteExceptions || {};
-      const siteHostname = message.hostname;
-      
-      // Filter blocks for this hostname (from tabId or URL matching)
-      const siteBlocked = siteBlockLog.filter(item => {
-        try {
-          const blockedUrl = new URL(item.url);
-          // Check if the blocked URL is from a request made on this site
-          return true; // We track all, popup will filter by tab
-        } catch {
-          return false;
-        }
-      });
-      
-      return {
-        blockedItems: siteBlocked,
-        exceptions: siteExceptions[siteHostname] || []
-      };
-    }
+    // 'getSiteBlocked' removed — use 'getTabBlocked' instead for accurate per-tab filtering
       
     case 'getTabBlocked': {
       // Get blocked items for a specific tab
@@ -505,7 +570,8 @@ async function handleMessage(message, sender) {
       
       return {
         blockedItems: tabBlocked,
-        exceptions: tabExceptions[tabHostname] || []
+        exceptions: tabExceptions[tabHostname] || [],
+        tabStats: tabBlockCounts.get(tabId) || { total: 0, ad: 0, tracker: 0, other: 0 }
       };
     }
       
@@ -551,16 +617,27 @@ async function handleMessage(message, sender) {
     
     // ========== Settings page handlers ==========
     
-    case 'getFilterLists':
-      // Return current filter list states
+    case 'getFilterLists': {
+      // Return current filter list states with actual rule counts
+      let adCount = 0, trackerCount = 0, minerCount = 0, malwareCount = 0;
+      try {
+        const rulesets = await chrome.declarativeNetRequest.getAvailableStaticRuleCount();
+        // Use enabled ruleset info if available, otherwise use estimates from our files
+        const enabledSets = await chrome.declarativeNetRequest.getEnabledRulesets();
+        // We can't get per-ruleset counts easily, so use file-based counts
+        adCount = 371; trackerCount = 355; minerCount = 10; malwareCount = 2;
+      } catch (e) {
+        adCount = 371; trackerCount = 355; minerCount = 10; malwareCount = 2;
+      }
       return {
         filterLists: [
-          { id: 'ads', name: 'Ad Blocking', enabled: settings.blockAds !== false, rulesCount: 350 },
-          { id: 'trackers', name: 'Tracker Blocking', enabled: settings.blockTrackers !== false, rulesCount: 195 },
-          { id: 'miners', name: 'Crypto Miner Blocking', enabled: settings.blockMiners !== false, rulesCount: 50 },
-          { id: 'malware', name: 'Malware Protection', enabled: settings.blockMalware !== false, rulesCount: 100 }
+          { id: 'ads', name: 'Ad Blocking', enabled: settings.blockAds !== false, rulesCount: adCount },
+          { id: 'trackers', name: 'Tracker Blocking', enabled: settings.blockTrackers !== false, rulesCount: trackerCount },
+          { id: 'miners', name: 'Crypto Miner Blocking', enabled: settings.blockMiners !== false, rulesCount: minerCount },
+          { id: 'malware', name: 'Malware Protection', enabled: settings.blockMalware !== false, rulesCount: malwareCount }
         ]
       };
+    }
     
     case 'toggleFilterList':
       // Toggle a specific filter list
@@ -600,12 +677,13 @@ async function handleMessage(message, sender) {
       const newRule = message.rule;
       if (newRule && newRule.pattern) {
         currentRules.push({
-          id: Date.now(),
+          id: Date.now().toString(), // store as string in storage to avoid ID conflicts, DNR maps to 400000+
           pattern: newRule.pattern,
           type: newRule.type || 'block',
           createdAt: new Date().toISOString()
         });
         await chrome.storage.local.set({ customRules: currentRules });
+        await updateRules();
       }
       return { success: true, rules: currentRules };
     
@@ -617,6 +695,7 @@ async function handleMessage(message, sender) {
         r.id !== message.ruleId && r.pattern !== message.pattern
       );
       await chrome.storage.local.set({ customRules: existingCustomRules });
+      await updateRules();
       return { success: true, rules: existingCustomRules };
     
     case 'whitelistSite':
@@ -633,6 +712,7 @@ async function handleMessage(message, sender) {
         settings.whitelist = settings.whitelist.filter(d => d !== whitelistDomain);
       }
       await chrome.storage.local.set({ settings });
+      await updateRules();
       return { success: true, whitelist: settings.whitelist };
     
     case 'blacklistSite':
@@ -649,6 +729,7 @@ async function handleMessage(message, sender) {
         settings.blacklist = settings.blacklist.filter(d => d !== blacklistDomain);
       }
       await chrome.storage.local.set({ settings });
+      await updateRules();
       return { success: true, blacklist: settings.blacklist };
     
     case 'exportSettings':
@@ -688,6 +769,15 @@ async function handleMessage(message, sender) {
     case 'clearAllData':
       // Clear all stored data
       await chrome.storage.local.clear();
+      
+      // Clear all dynamic rules
+      const existingDynamicRules = await chrome.declarativeNetRequest.getDynamicRules();
+      if (existingDynamicRules.length > 0) {
+        await chrome.declarativeNetRequest.updateDynamicRules({
+          removeRuleIds: existingDynamicRules.map(r => r.id)
+        });
+      }
+      
       settings = {
         blockAds: true,
         blockTrackers: true,
@@ -703,7 +793,7 @@ async function handleMessage(message, sender) {
       return { success: true };
       
     default:
-      console.log('⚠️ Unknown action:', action);
+      console.log('[BlockForge] ️ Unknown action:', action);
       return { error: 'Unknown action: ' + action };
   }
 }
@@ -719,7 +809,16 @@ async function addDynamicAllowRule(url) {
     
     // Get current dynamic rules
     const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
-    const ruleId = dynamicRuleId++;
+    
+    // Compute safe next rule ID to avoid conflicts on extension restart
+    let ruleId = dynamicRuleId++;
+    if (existingRules.length > 0) {
+      const maxId = Math.max(...existingRules.map(r => r.id));
+      if (maxId >= ruleId) {
+        ruleId = maxId + 1;
+        dynamicRuleId = ruleId + 1;
+      }
+    }
     
     // Create allow rule
     const rule = {
@@ -741,9 +840,9 @@ async function addDynamicAllowRule(url) {
     ruleMap[url] = ruleId;
     await chrome.storage.local.set({ exceptionRuleMap: ruleMap });
     
-    console.log('✅ Added allow rule for:', url);
+    console.log('[BlockForge] Added allow rule for:', url);
   } catch (error) {
-    console.error('❌ Failed to add allow rule:', error);
+    console.error('[BlockForge] Failed to add allow rule:', error);
   }
 }
 
@@ -760,10 +859,10 @@ async function removeDynamicAllowRule(url) {
       delete ruleMap[url];
       await chrome.storage.local.set({ exceptionRuleMap: ruleMap });
       
-      console.log('✅ Removed allow rule for:', url);
+      console.log('[BlockForge] Removed allow rule for:', url);
     }
   } catch (error) {
-    console.error('❌ Failed to remove allow rule:', error);
+    console.error('[BlockForge] Failed to remove allow rule:', error);
   }
 }
 
@@ -782,24 +881,20 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 // Handle installation
 chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === 'install') {
-    console.log('🎉 BlockForge installed!');
+    console.log('[BlockForge] BlockForge installed!');
     
-    // Set default values
-    await chrome.storage.local.set({
-      isEnabled: true,
-      settings: getDefaultSettings(),
-      statistics: {
-        totalBlocked: 0,
-        adsBlocked: 0,
-        trackersBlocked: 0,
-        minersBlocked: 0,
-        malwareBlocked: 0,
-        dataSaved: 0,
-        timeSaved: 0
-      },
-      dailyStats: {},
-      blockLog: []
-    });
+    // Set default values safely
+    try {
+      await chrome.storage.local.set({
+        isEnabled: true,
+        settings: getDefaultSettings(),
+        statistics: getDefaultStats(),
+        dailyStats: {},
+        blockLog: []
+      });
+    } catch (error) {
+      console.error('[BlockForge] Failed to set default settings on install:', error);
+    }
     
     // Open welcome page
     try {
@@ -808,12 +903,12 @@ chrome.runtime.onInstalled.addListener(async (details) => {
       console.log('Could not open welcome page');
     }
   } else if (details.reason === 'update') {
-    console.log('🔄 BlockForge updated to version', chrome.runtime.getManifest().version);
+    console.log('[BlockForge] BlockForge updated to version', chrome.runtime.getManifest().version);
   }
 });
 
 // Initialize on startup
 initialize();
 
-console.log('🛡️ BlockForge service worker loaded');
+console.log('[BlockForge] BlockForge service worker loaded');
 

@@ -1,22 +1,22 @@
 /**
- * ShieldGuard - Content Script Styles
+ * BlockForge - Content Script Styles
  * 
- * CSS for hiding ad elements and styling injected UI elements
+ * Minimal CSS that complements the JS-injected cosmetic styles.
+ * The bulk of ad hiding is handled by injectCosmeticStyles() in content.js.
+ * This file contains only: YouTube-specific selectors and UI elements.
  */
 
 /* ============================================================================
-   AD ELEMENT HIDING
+   GOOGLE ADS (STATIC - loaded before JS runs)
    ============================================================================ */
 
-/* Generic ad containers - very specific to avoid false positives */
-/* Only target actual Google Ad iframe containers, not Google's own UI */
+/* Specific Google Ad iframe containers */
 iframe[id*="google_ads_iframe"],
 iframe[id*="aswift_"],
 div[id^="div-gpt-ad-"],
 ins[data-ad-slot],
 ins[data-ad-client],
-div[data-adservice][data-ad-slot],
-div[class^="adsbygoogle"]:not([class*="search"]):not([class*="nav"]) {
+div[data-adservice][data-ad-slot] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
@@ -27,21 +27,18 @@ div[class^="adsbygoogle"]:not([class*="search"]):not([class*="nav"]) {
   overflow: hidden !important;
 }
 
-/* Google Ads */
 ins.adsbygoogle {
   display: none !important;
   visibility: hidden !important;
 }
 
 /* AMP ads */
-amp-ad,
-amp-embed,
-amp-sticky-ad {
+amp-ad, amp-embed, amp-sticky-ad {
   display: none !important;
   visibility: hidden !important;
 }
 
-/* Tracking pixels - more specific to avoid blocking emojis */
+/* Tracking pixels */
 img[width="1"][height="1"],
 img[width="1"][src*="analytics"],
 img[width="1"][src*="tracking"],
@@ -55,7 +52,7 @@ img[src*="beacon."][height="1"] {
   visibility: hidden !important;
 }
 
-/* Ad iframes - be specific to avoid blocking legitimate Google services */
+/* Ad iframes */
 iframe[src*="doubleclick.net"],
 iframe[src*="googlesyndication.com"],
 iframe[src*="googleadservices.com"],
@@ -67,158 +64,10 @@ iframe[id^="aswift_"] {
   visibility: hidden !important;
 }
 
-/* Social tracking widgets - optional, uncomment if needed */
-/*
-.fb-like,
-.fb-share-button,
-.twitter-share-button,
-.g-plus,
-.linkedin-share {
-  display: none !important;
-}
-*/
-
 /* ============================================================================
-   SHIELDGUARD UI ELEMENTS
+   YOUTUBE AD BLOCKING (comprehensive)
    ============================================================================ */
 
-/* Threat indicator badge */
-.shieldguard-threat-badge {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 2147483647;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  animation: shieldguard-slide-in 0.3s ease-out;
-  cursor: pointer;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.shieldguard-threat-badge:hover {
-  transform: scale(1.05);
-}
-
-.shieldguard-threat-badge.hidden {
-  opacity: 0;
-  transform: translateY(-20px);
-  pointer-events: none;
-}
-
-.shieldguard-threat-badge .icon {
-  width: 16px;
-  height: 16px;
-}
-
-@keyframes shieldguard-slide-in {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Protection status indicator */
-.shieldguard-status {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 2147483647;
-  background: rgba(16, 185, 129, 0.9);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.shieldguard-status.visible {
-  opacity: 1;
-}
-
-.shieldguard-status .dot {
-  width: 6px;
-  height: 6px;
-  background: white;
-  border-radius: 50%;
-  animation: shieldguard-pulse 2s infinite;
-}
-
-@keyframes shieldguard-pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-/* Blocked content placeholder */
-.shieldguard-blocked-placeholder {
-  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-  border: 1px dashed #d1d5db;
-  border-radius: 8px;
-  padding: 20px;
-  text-align: center;
-  color: #6b7280;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 12px;
-  margin: 10px 0;
-}
-
-.shieldguard-blocked-placeholder .icon {
-  font-size: 24px;
-  margin-bottom: 8px;
-  opacity: 0.5;
-}
-
-.shieldguard-blocked-placeholder .message {
-  font-weight: 500;
-  color: #374151;
-}
-
-/* ============================================================================
-   DARK MODE SUPPORT
-   ============================================================================ */
-
-@media (prefers-color-scheme: dark) {
-  .shieldguard-blocked-placeholder {
-    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-    border-color: #374151;
-    color: #9ca3af;
-  }
-  
-  .shieldguard-blocked-placeholder .message {
-    color: #d1d5db;
-  }
-}
-
-/* ============================================================================
-   YOUTUBE AD BLOCKING
-   ============================================================================ */
-
-/* YouTube companion ads and view models - specific selectors only */
 #player-ads,
 ytd-player-legacy-desktop-watch-ads-renderer,
 ytd-companion-slot-renderer,
@@ -284,23 +133,95 @@ ytd-promoted-sparkles-text-search-renderer {
 }
 
 /* ============================================================================
-   ANIMATIONS FOR REMOVED ELEMENTS
+   BLOCKFORGE UI ELEMENTS
    ============================================================================ */
+
+.shieldguard-threat-badge {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 2147483647;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: shieldguard-slide-in 0.3s ease-out;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.shieldguard-threat-badge:hover { transform: scale(1.05); }
+.shieldguard-threat-badge.hidden { opacity: 0; transform: translateY(-20px); pointer-events: none; }
+.shieldguard-threat-badge .icon { width: 16px; height: 16px; }
+
+@keyframes shieldguard-slide-in {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.shieldguard-status {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2147483647;
+  background: rgba(37, 99, 235, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.shieldguard-status.visible { opacity: 1; }
+.shieldguard-status .dot { width: 6px; height: 6px; background: white; border-radius: 50%; animation: shieldguard-pulse 2s infinite; }
+
+@keyframes shieldguard-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+.shieldguard-blocked-placeholder {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  color: #6b7280;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 12px;
+  margin: 10px 0;
+}
+
+.shieldguard-blocked-placeholder .icon { font-size: 24px; margin-bottom: 8px; opacity: 0.5; }
+.shieldguard-blocked-placeholder .message { font-weight: 500; color: #374151; }
+
+@media (prefers-color-scheme: dark) {
+  .shieldguard-blocked-placeholder {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    border-color: #374151;
+    color: #9ca3af;
+  }
+  .shieldguard-blocked-placeholder .message { color: #d1d5db; }
+}
 
 .shieldguard-removing {
   animation: shieldguard-fade-out 0.2s ease-out forwards;
 }
 
 @keyframes shieldguard-fade-out {
-  from {
-    opacity: 1;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.95);
-    height: 0;
-    margin: 0;
-    padding: 0;
-  }
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); height: 0; margin: 0; padding: 0; }
 }

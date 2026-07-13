@@ -1,3 +1,4 @@
+
 /**
  * BlockForge - Enhanced Dashboard Script
  * Advanced analytics and detailed statistics
@@ -13,6 +14,17 @@ let requestTypes = {};
 let sessionStartTime = Date.now();
 
 // Initialize
+// Security: HTML Sanitizer
+function escapeHTML(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   await loadData();
   setupEventListeners();
@@ -25,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
  */
 async function loadData() {
   try {
-    const response = await chrome.runtime.sendMessage({ action: 'getStatistics' });
+    const response = await safeSendMessage({ action: 'getStatistics' });
     
     if (response) {
       statistics = response.statistics || {};
@@ -154,10 +166,10 @@ function updateOverviewCards() {
     
     if (yesterdayBlocks > 0) {
       const change = Math.round((todayBlocks - yesterdayBlocks) / yesterdayBlocks * 100);
-      const icon = change >= 0 ? '📈' : '📉';
+      const icon = change >= 0 ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>' : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>';
       trendEl.innerHTML = `<span class="trend-icon">${icon}</span><span class="trend-text">${change >= 0 ? '+' : ''}${change}% vs yesterday</span>`;
     } else if (todayBlocks > 0) {
-      trendEl.innerHTML = `<span class="trend-icon">🆕</span><span class="trend-text">${todayBlocks} blocked today</span>`;
+      trendEl.innerHTML = `<span class="trend-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span><span class="trend-text">${todayBlocks} blocked today</span>`;
     }
   }
 }
@@ -206,10 +218,10 @@ function updateCategoryChart() {
   }
   
   const categories = [
-    { name: 'Ads', value: statistics.adsBlocked || 0, color: '#ef4444', icon: '📢' },
-    { name: 'Trackers', value: statistics.trackersBlocked || 0, color: '#f59e0b', icon: '👁️' },
-    { name: 'Miners', value: statistics.minersBlocked || 0, color: '#8b5cf6', icon: '⛏️' },
-    { name: 'Malware', value: statistics.malwareBlocked || 0, color: '#ec4899', icon: '☠️' }
+    { name: 'Ads', value: statistics.adsBlocked || 0, color: '#ef4444', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>' },
+    { name: 'Trackers', value: statistics.trackersBlocked || 0, color: '#f59e0b', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>' },
+    { name: 'Miners', value: statistics.minersBlocked || 0, color: '#2563eb', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14l-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 11"></path><path d="M17.64 15L22 10.64"></path><path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25v-.86L16.01 4.6a5.56 5.56 0 0 0-3.94-1.64H11.2l-2.8 2.8c-.8.8-.8 2.1 0 2.9l8 8c.8.8 2.1.8 2.9 0l1.6-1.6c.8-.8.8-2.1 0-2.9Z"></path></svg>' },
+    { name: 'Malware', value: statistics.malwareBlocked || 0, color: '#3b82f6', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>' }
   ];
   
   let html = '<div class="category-cards">';
@@ -346,12 +358,12 @@ function updateProtectionSummary() {
   const todayBlocks = dailyStats[today]?.total || 0;
   
   const summaryItems = [
-    { label: 'Total Threats Blocked', value: formatNumber(total), icon: '🛡️' },
-    { label: 'Blocked Today', value: formatNumber(todayBlocks), icon: '📅' },
-    { label: 'Sites Protected', value: formatNumber(Object.keys(siteStats).length), icon: '🌐' },
-    { label: 'Data Saved', value: formatBytes(statistics.dataSaved || 0), icon: '💾' },
-    { label: 'Time Saved', value: formatTime(statistics.timeSaved || 0), icon: '⚡' },
-    { label: 'Active Days', value: formatNumber(Object.keys(dailyStats).length), icon: '📊' }
+    { label: 'Total Threats Blocked', value: formatNumber(total), icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>' },
+    { label: 'Blocked Today', value: formatNumber(todayBlocks), icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>' },
+    { label: 'Sites Protected', value: formatNumber(Object.keys(siteStats).length), icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>' },
+    { label: 'Data Saved', value: formatBytes(statistics.dataSaved || 0), icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>' },
+    { label: 'Time Saved', value: formatTime(statistics.timeSaved || 0), icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>' },
+    { label: 'Active Days', value: formatNumber(Object.keys(dailyStats).length), icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>' }
   ];
   
   let html = '<div class="summary-grid">';
@@ -393,14 +405,15 @@ function updateRecentBlocks() {
   
   recent.forEach(block => {
     const time = new Date(block.timestamp).toLocaleTimeString();
-    const domain = extractDomain(block.url);
-    const typeClass = block.type || 'unknown';
-    const typeLabel = block.type ? block.type.charAt(0).toUpperCase() + block.type.slice(1) : 'Unknown';
+    const domain = escapeHTML(extractDomain(block.url));
+    const safeUrl = escapeHTML(block.url);
+    const typeClass = escapeHTML(block.type || 'unknown');
+    const typeLabel = escapeHTML(block.type ? block.type.charAt(0).toUpperCase() + block.type.slice(1) : 'Unknown');
     
     html += `
       <div class="log-item">
         <span class="log-type ${typeClass}">${typeLabel}</span>
-        <span class="log-domain" title="${block.url}">${domain}</span>
+        <span class="log-domain" title="${safeUrl}">${domain}</span>
         <span class="log-time">${time}</span>
       </div>
     `;
@@ -441,11 +454,12 @@ function updateTopDomains() {
   
   sorted.forEach(([domain, count], index) => {
     const width = (count / maxCount * 100);
+    const safeDomain = escapeHTML(domain);
     html += `
       <div class="domain-item">
         <span class="domain-rank">${index + 1}</span>
         <div class="domain-info">
-          <span class="domain-name">${domain}</span>
+          <span class="domain-name" title="${safeDomain}">${safeDomain}</span>
           <div class="domain-bar">
             <div class="domain-bar-fill" style="width: ${width}%"></div>
           </div>
@@ -516,12 +530,12 @@ function updateRequestTypes() {
   const typeColors = {
     'script': '#ef4444',
     'image': '#f59e0b',
-    'xmlhttprequest': '#10b981',
-    'sub_frame': '#6366f1',
-    'stylesheet': '#8b5cf6',
-    'font': '#ec4899',
+    'xmlhttprequest': '#2563eb',
+    'sub_frame': '#2563eb',
+    'stylesheet': '#2563eb',
+    'font': '#3b82f6',
     'media': '#14b8a6',
-    'other': '#64748b'
+    'other': '#71717a'
   };
   
   let html = '<div class="request-types-grid">';
@@ -600,7 +614,7 @@ function setupEventListeners() {
   // Reset stats button
   document.getElementById('resetStats')?.addEventListener('click', async () => {
     if (confirm('Are you sure you want to reset ALL statistics? This cannot be undone.')) {
-      await chrome.runtime.sendMessage({ action: 'resetStatistics' });
+      await safeSendMessage({ action: 'resetStatistics' });
       await loadData();
     }
   });

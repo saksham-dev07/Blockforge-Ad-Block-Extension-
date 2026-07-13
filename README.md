@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # BlockForge
 
@@ -44,7 +44,7 @@ Unlike traditional blockers, BlockForge goes beyond simple filter lists — it a
 
 ### Why BlockForge?
 
--  **539+ built-in blocking rules** across ads, trackers, miners, and malware
+-  **738+ built-in blocking rules** across ads, trackers, miners, and malware
 -  **Zero-configuration** — works perfectly out of the box
 -  **100% local** — no servers, no telemetry, no data collection
 -  **Lightweight & fast** — uses native Chrome APIs for optimal performance
@@ -62,12 +62,12 @@ BlockForge employs a sophisticated multi-layer approach to content blocking:
 
 | Category | Rules | Description |
 |----------|-------|-------------|
-| **Ads** | 332 | Display ads, video ads, pop-ups, banners, sponsored content |
-| **Trackers** | 195 | Analytics scripts, tracking pixels, social widgets, cross-site trackers |
+| **Ads** | 371 | Display ads, video ads, pop-ups, banners, sponsored content |
+| **Trackers** | 355 | Analytics scripts, tracking pixels, social widgets, cross-site trackers |
 | **Miners** | 10 | Cryptocurrency miners, CPU-intensive scripts |
 | **Malware** | 2 | Known malicious domains, phishing sites |
 
-**Total Protection**: 539 blocking rules
+**Total Protection**: 738 blocking rules
 
 - Uses Chrome''s native `declarativeNetRequest` API for maximum efficiency
 - No DOM manipulation overhead for basic blocking
@@ -155,18 +155,8 @@ cd blockforge
 
 Or download the ZIP file and extract it.
 
-#### Step 2: Generate PNG Icons
 
-BlockForge uses SVG icons by default, but Chrome requires PNG versions:
-
-1. Open `icons/generate-icons.html` in your browser
-2. Click **"Download All Images"**
-3. Save all PNG files to the `icons/` folder:
-   - `icon16.png` (1616)
-   - `icon48.png` (4848)
-   - `icon128.png` (128128)
-
-#### Step 3: Load in Chrome/Edge
+#### Step 2: Load in Chrome/Edge
 
 1. Open your browser and navigate to:
    - **Chrome**: `chrome://extensions/`
@@ -180,7 +170,7 @@ BlockForge uses SVG icons by default, but Chrome requires PNG versions:
 
 4. Select the `browser extension` folder
 
-#### Step 4: Verify Installation
+#### Step 3: Verify Installation
 
 - You should see the BlockForge icon  in your browser toolbar
 - Click it to open the popup and verify features are working
@@ -444,17 +434,16 @@ browser extension/
     dashboard.js              # Chart rendering & data visualization
 
  rules/                        # Filter Lists (JSON)
-    ads.json                  # Ad blocking rules (332)
-    trackers.json             # Tracker blocking rules (195)
+    ads.json                  # Ad blocking rules (371)
+    trackers.json             # Tracker blocking rules (355)
     miners.json               # Cryptominer rules (10)
     malware.json              # Malware blocking rules (2)
 
  icons/                        # Extension Icons
-    icon16.svg                # Toolbar icon (SVG)
-    icon48.svg                # Extension icon (SVG)
-    icon128.svg               # Store icon (SVG)
-    generate-icons.html       # PNG generator tool
-    create-icons.ps1          # PowerShell icon script
+    icon16.png                # Toolbar icon (PNG)
+    icon32.png                # Standard icon (PNG)
+    icon48.png                # Extension icon (PNG)
+    icon128.png               # Store icon (PNG)
 
  _metadata/                    # Chrome Extension Metadata
     generated_indexed_rulesets/  # Compiled DNR rulesets
@@ -847,7 +836,7 @@ Filter lists are in `rules/*.json`:
 
 **Rule Limits**:
 - Maximum 30,000 rules per extension (Chrome limit)
-- Current usage: 539 rules (~2% of limit)
+- Current usage: 738 rules (~2.5% of limit)
 
 ### Debugging Tips
 
