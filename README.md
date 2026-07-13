@@ -1,42 +1,42 @@
 ﻿<div align="center">
 
-#  BlockForge
+# BlockForge
 
 ### Advanced Privacy & Ad Blocking Extension
 
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?style=flat-square&logo=googlechrome&logoColor=white)](https://www.google.com/chrome/)
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-34A853?style=flat-square&logo=google&logoColor=white)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-FFC107?style=flat-square)](LICENSE)
-[![Made with ](https://img.shields.io/badge/Made%20with--E91E63?style=flat-square)](https://github.com/saksham-dev07)
+
 
 **Block ads, trackers, malware & protect your privacy — all in one powerful extension.**
 
-[Features](#-features)  [Installation](#-installation)  [Usage](#-usage)  [Privacy](#-privacy--security)  [Contributing](#-contributing)
+[Features](#features)  [Installation](#installation)  [Usage](#usage)  [Privacy](#privacy--security)  [Contributing](#contributing)
 
 ---
 
 </div>
 
-##  Table of Contents
+## Table of Contents
 
-- [Overview](#-overview)
-- [Features](#-features)
-- [Installation](#-installation)
-- [Usage](#-usage)
-- [Configuration](#-configuration)
-- [Project Structure](#-project-structure)
-- [Technical Details](#-technical-details)
-- [Privacy & Security](#-privacy--security)
-- [Performance](#-performance)
-- [Troubleshooting](#-troubleshooting)
-- [Development](#-development)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Acknowledgments](#-acknowledgments)
+- [Overview](#overview)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Project Structure](#project-structure)
+- [Technical Details](#technical-details)
+- [Privacy & Security](#privacy--security)
+- [Performance](#performance)
+- [Troubleshooting](#troubleshooting)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
 
 ---
 
-##  Overview
+## Overview
 
 **BlockForge** is a next-generation browser extension that combines powerful ad blocking, comprehensive privacy protection, and advanced threat detection into a single, lightweight solution. Built on Chrome''s Manifest V3 architecture, it leverages the latest web technologies to provide maximum protection with minimal performance impact.
 
@@ -54,9 +54,9 @@ Unlike traditional blockers, BlockForge goes beyond simple filter lists — it a
 
 ---
 
-##  Features
+## Features
 
-###  Multi-Layer Blocking System
+### Multi-Layer Blocking System
 
 BlockForge employs a sophisticated multi-layer approach to content blocking:
 
@@ -74,7 +74,7 @@ BlockForge employs a sophisticated multi-layer approach to content blocking:
 - Supports custom filter rules with multiple syntaxes
 - Automatic ruleset updates
 
-###  AI-Powered Threat Detection
+### AI-Powered Threat Detection
 
 Advanced machine learning algorithms identify and block emerging threats:
 
@@ -84,7 +84,7 @@ Advanced machine learning algorithms identify and block emerging threats:
 - **Continuous Learning**: Improves detection accuracy over time
 - **Heuristic Scoring**: Assigns threat levels to unknown domains
 
-###  Comprehensive Privacy Suite
+### Comprehensive Privacy Suite
 
 BlockForge protects against all major fingerprinting techniques:
 
@@ -99,7 +99,7 @@ BlockForge protects against all major fingerprinting techniques:
 | **Referrer Spoofing** | Controls referrer headers | Protects browsing history |
 | **Battery API Blocking** | Prevents battery status tracking | Stops battery-based fingerprinting |
 
-###  Advanced Analytics Dashboard
+### Advanced Analytics Dashboard
 
 Real-time insights into your browsing protection:
 
@@ -112,7 +112,7 @@ Real-time insights into your browsing protection:
 - **AI Detection History**: Timeline of AI-detected threats
 - **Per-Site Analytics**: Detailed breakdown for individual websites
 
-###  Modern User Interface
+### Modern User Interface
 
 Designed for both aesthetics and functionality:
 
@@ -124,7 +124,7 @@ Designed for both aesthetics and functionality:
 - **Color-Coded Stats**: Quick visual understanding of threat categories
 - **Tabbed Navigation**: Easy access to all features
 
-###  YouTube Ad Blocking
+### YouTube Ad Blocking
 
 Specialized YouTube protection:
 
@@ -136,7 +136,7 @@ Specialized YouTube protection:
 
 ---
 
-##  Installation
+## Installation
 
 ### Option 1: Chrome Web Store (Recommended)
 
@@ -199,7 +199,7 @@ BlockForge uses SVG icons by default, but Chrome requires PNG versions:
 
 ---
 
-##  Usage
+## Usage
 
 ### Quick Start
 
@@ -245,14 +245,14 @@ Click the BlockForge icon in your toolbar to access quick controls:
 
 Right-click the extension icon  **Options** (or click  in popup):
 
-####  General Settings
+#### General Settings
 ```
 Protection Level:   Minimal   Moderate   Aggressive
 Auto-Update Rules:  Enabled
 Show Notifications:  Enabled (on threat detection)
 ```
 
-####  Privacy Protection
+#### Privacy Protection
 ```
  Canvas Fingerprint Protection
  WebGL Fingerprint Protection
@@ -264,7 +264,7 @@ Show Notifications:  Enabled (on threat detection)
  Battery API Blocking
 ```
 
-####  Custom Rules
+#### Custom Rules
 
 Add your own blocking rules using familiar syntax:
 
@@ -287,7 +287,7 @@ example.com##.sidebar-ad              # Domain-specific cosmetic
 @@||example.com/ads/*                 # Allow specific path
 ```
 
-####  Whitelisted Sites
+#### Whitelisted Sites
 
 Disable blocking on trusted websites:
 ```
@@ -319,7 +319,7 @@ Access from popup  **Dashboard** or right-click  **Options**  **Dashboard**:
 
 ---
 
-##  Configuration
+## Configuration
 
 ### Blocking Levels Explained
 
@@ -404,7 +404,7 @@ Each privacy feature can be toggled independently:
 
 ---
 
-##  Project Structure
+## Project Structure
 
 ```
 browser extension/
@@ -497,7 +497,7 @@ browser extension/
 
 ---
 
-##  Technical Details
+## Technical Details
 
 ### Manifest V3 Architecture
 
@@ -607,19 +607,19 @@ BlockForge uses Chrome''s local storage with the following structure:
 
 ---
 
-##  Privacy & Security
+## Privacy & Security
 
 ### Privacy Commitments
 
 BlockForge is designed with privacy as the **core principle**:
 
-####  What We Do
+#### What We Do
 -  Store all data **locally** on your device only
 -  Process everything **client-side** (no servers)
 -  Provide **full transparency** (open source)
 -  Require **minimal permissions** (only what''s needed)
 
-####  What We DON''T Do
+#### What We DON''T Do
 -  **No telemetry** or usage tracking
 -  **No analytics** or data collection
 -  **No accounts** or user identification
@@ -660,7 +660,7 @@ The entire codebase is available for inspection:
 
 ---
 
-##  Performance
+## Performance
 
 ### Benchmarks
 
@@ -692,7 +692,7 @@ Based on average user statistics:
 
 ---
 
-##  Troubleshooting
+## Troubleshooting
 
 ### Common Issues & Solutions
 
@@ -769,7 +769,7 @@ Found a bug? Please report it!
 
 ---
 
-##  Development
+## Development
 
 ### Getting Started
 
@@ -874,13 +874,13 @@ F12  Network tab  Filter by "Blocked" status
 
 ---
 
-##  Contributing
+## Contributing
 
 Contributions are **highly welcome**! Whether it''s bug reports, feature requests, or pull requests, we appreciate all help.
 
 ### How to Contribute
 
-####  Report Bugs
+#### Report Bugs
 
 1. Check [existing issues](https://github.com/saksham-dev07/blockforge/issues) first
 2. Create new issue with template:
@@ -894,14 +894,14 @@ Contributions are **highly welcome**! Whether it''s bug reports, feature request
    **Console Errors**: (paste any errors)
    ```
 
-####  Suggest Features
+#### Suggest Features
 
 1. Open a GitHub Issue with `[Feature Request]` prefix
 2. Describe the feature and use case
 3. Explain why it would be valuable
 4. Include mockups/examples if applicable
 
-####  Submit Pull Requests
+#### Submit Pull Requests
 
 1. **Fork** the repository
 2. **Create branch**: `git checkout -b feature/amazing-feature`
@@ -942,7 +942,7 @@ Contributions are **highly welcome**! Whether it''s bug reports, feature request
 
 ---
 
-##  License
+## License
 
 ```
 MIT License
@@ -976,7 +976,7 @@ SOFTWARE.
 
 ---
 
-##  Acknowledgments
+## Acknowledgments
 
 BlockForge wouldn''t be possible without these amazing resources:
 
@@ -1006,11 +1006,11 @@ BlockForge wouldn''t be possible without these amazing resources:
 
 ---
 
-##  Support & Contact
+## Support & Contact
 
 ### Get Help
 
-- **Documentation**: You''re reading it! Check [Troubleshooting](#-troubleshooting) section
+- **Documentation**: You''re reading it! Check [Troubleshooting](#troubleshooting) section
 - **GitHub Issues**: [Report bugs or request features](https://github.com/saksham-dev07/blockforge/issues)
 - **Discussions**: [Community forum](https://github.com/saksham-dev07/blockforge/discussions)
 
@@ -1030,10 +1030,10 @@ BlockForge wouldn''t be possible without these amazing resources:
 
 <div align="center">
 
-###  Star this repository if you find it useful!
+### Star this repository if you find it useful!
 
-**Made with  for a more private web**
+**Built for a more private web**
 
-[ Back to Top](#-blockforge)
+[ Back to Top](#blockforge)
 
 </div>
