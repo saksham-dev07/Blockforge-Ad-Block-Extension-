@@ -265,20 +265,39 @@
           video.muted = false;
         }
         
-        // Remove overlay & banner ads
-        document.querySelectorAll(
-          '.ytp-ad-overlay-container, .ytp-ad-overlay-slot, ' +
-          '.ytp-ad-image-overlay, .ytp-ad-text-overlay'
-        ).forEach(el => { el.style.display = 'none'; pageStats.elementsRemoved++; });
+        // NOTE: We intentionally do NOT hide YouTube ad DOM elements.
+        // YouTube's anti-adblock JS checks element visibility and reports
+        // to the server, which then 403s the video stream.
+        // Instead, we rely solely on video-level ad skipping above.
         
-        document.querySelectorAll(
-          'ytd-banner-promo-renderer, ytd-statement-banner-renderer, ' +
-          '#masthead-ad, ytd-display-ad-renderer, ytd-promoted-sparkles-web-renderer, ' +
-          'ytd-ad-slot-renderer, ytd-in-feed-ad-layout-renderer, ' +
-          'ytd-promoted-video-renderer, ytd-search-pyv-renderer, ' +
-          'ytd-compact-promoted-video-renderer, #player-ads, ' +
-          'ytd-companion-slot-renderer, ytd-action-companion-ad-renderer'
-        ).forEach(el => { el.style.display = 'none'; pageStats.elementsRemoved++; });
+        // Handle YouTube Anti-Adblock Popups
+        const antiAdblockDialogs = document.querySelectorAll('tp-yt-paper-dialog, ytd-popup-container');
+        for (const dialog of antiAdblockDialogs) {
+          const text = dialog.textContent || '';
+          if (text.includes('Ad blockers violate') || 
+              text.includes('Ad blockers are not allowed') || 
+              text.includes('Video player will be blocked') ||
+              text.includes('It looks like you may be using an ad blocker')) {
+            
+            dialog.style.display = 'none';
+            document.querySelectorAll('tp-yt-iron-overlay-backdrop').forEach(el => el.style.display = 'none');
+            
+            const ytApp = document.querySelector('ytd-app');
+            if (ytApp) ytApp.style.overflow = '';
+            document.body.style.overflow = '';
+            
+            // Unpause video if the popup paused it
+            if (video && video.paused) {
+              video.play().catch(() => {});
+            }
+            
+            // Click the play button if necessary (sometimes YouTube overrides video.play())
+            const playButton = document.querySelector('.ytp-play-button');
+            if (playButton && playButton.getAttribute('data-title-no-tooltip') === 'Play') {
+              playButton.click();
+            }
+          }
+        }
         
       } catch (error) {
         if (error.message?.includes('Extension context invalidated')) {
@@ -409,11 +428,20 @@
       // Check src for ad keywords
       let hasAdKeyword = false;
       for (const keyword of AD_KEYWORDS) {
-        if (src.includes(keyword) || src.includes(`/${keyword}/`) || 
-            src.includes(`_${keyword}_`) || src.includes(`-${keyword}-`) ||
-            src.includes(`${keyword}.`) || src.includes(`.${keyword}`)) {
-          hasAdKeyword = true;
-          break;
+        if (keyword === 'ad' || keyword === 'ads') {
+          // Require delimiters for short, common generic words
+          if (src.includes(`/${keyword}/`) || src.includes(`_${keyword}_`) || 
+              src.includes(`-${keyword}-`) || src.includes(`.${keyword}`) || 
+              src.includes(`${keyword}.`) || src.includes(`?${keyword}=`) ||
+              src.includes(`&${keyword}=`)) {
+            hasAdKeyword = true;
+            break;
+          }
+        } else {
+          if (src.includes(keyword)) {
+            hasAdKeyword = true;
+            break;
+          }
         }
       }
       
@@ -474,9 +502,17 @@
       
       // Check ad patterns in attributes
       for (const pattern of adPatterns) {
-        if (src.includes(pattern) || name.includes(pattern) || 
-            id.includes(pattern) || className.includes(pattern)) {
-          removeElement(iframe); removed++; return;
+        if (pattern === 'ad' || pattern === 'ads') {
+          // Use boundary matching for short generic words
+          const regex = new RegExp(`(^|[-_./&? ])${pattern}([-_./&? ]|$)`, 'i');
+          if (regex.test(src) || regex.test(name) || regex.test(id) || regex.test(className)) {
+            removeElement(iframe); removed++; return;
+          }
+        } else {
+          if (src.includes(pattern) || name.includes(pattern) || 
+              id.includes(pattern) || className.includes(pattern)) {
+            removeElement(iframe); removed++; return;
+          }
         }
       }
       
@@ -882,16 +918,11 @@
         }
       `;
     } else if (isYouTube()) {
-      style.textContent = `
-        /* YouTube-specific ad elements */
-        ytd-display-ad-renderer, ytd-promoted-sparkles-web-renderer,
-        ytd-promoted-video-renderer, ytd-ad-slot-renderer,
-        ytd-in-feed-ad-layout-renderer, ytd-banner-promo-renderer,
-        #masthead-ad, #player-ads ytd-player-legacy-desktop-watch-ads-renderer,
-        ytd-search-pyv-renderer, ytd-compact-promoted-video-renderer {
-          display: none !important;
-        }
-      `;
+      // NO cosmetic CSS for YouTube!
+      // YouTube's anti-adblock JS checks element visibility.
+      // Hiding elements triggers server-side 403 on the video stream.
+      // We rely solely on the video-level auto-skipper in initYouTubeAdBlocker().
+      return;
     } else {
       // Full cosmetic blocking for normal sites
       style.textContent = `
@@ -1074,6 +1105,9 @@
   
   function injectProtectionScript() {
     if (!isExtensionContextValid()) return;
+    // Skip on YouTube — blob URL injection triggers CSP violations
+    // that YouTube's anti-adblock detection picks up
+    if (isYouTube()) return;
     
     try {
       chrome.runtime.sendMessage({ type: 'INJECT_PROTECTION_SCRIPT' }, (response) => {

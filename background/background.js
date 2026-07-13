@@ -100,7 +100,7 @@ async function updateRules() {
     
     // Clear our managed dynamic rules (whitelist 200k+, blacklist 300k+, custom 400k-600k)
     const managedRuleIds = existingRules
-      .filter(r => (r.id >= 200000 && r.id < 600000))
+      .filter(r => (r.id >= 190000 && r.id < 600000))
       .map(r => r.id);
     
     const newDynamicRules = [];
@@ -158,7 +158,21 @@ async function updateRules() {
       addRules: newDynamicRules
     });
     
-    console.log(`[BlockForge] Rules updated. Synced ${newDynamicRules.length} dynamic rules.`);
+    // Toggle static rulesets based on extension enabled state
+    const staticRulesets = ['ads_rules', 'trackers_rules', 'miners_rules', 'malware_rules'];
+    await chrome.declarativeNetRequest.updateEnabledRulesets({
+      enableRulesetIds: isEnabled ? staticRulesets : [],
+      disableRulesetIds: isEnabled ? [] : staticRulesets
+    });
+    
+    // Always unregister youtube-bypass to prevent 403 Forbidden issues
+    try {
+      await chrome.scripting.unregisterContentScripts({ ids: ['youtube-bypass'] });
+    } catch (e) {
+      // Ignore
+    }
+    
+    console.log(`[BlockForge] Rules updated. Synced ${newDynamicRules.length} dynamic rules. Static rulesets: ${isEnabled ? 'enabled' : 'disabled'}`);
   } catch (error) {
     console.error('[BlockForge] Failed to update rules:', error);
   }
