@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # BlockForge
 
@@ -41,6 +41,27 @@
 **BlockForge** is a next-generation browser extension that combines powerful ad blocking, comprehensive privacy protection, and advanced threat detection into a single, lightweight solution. Built on Chrome''s Manifest V3 architecture, it leverages the latest web technologies to provide maximum protection with minimal performance impact.
 
 Unlike traditional blockers, BlockForge goes beyond simple filter lists â€” it actively protects you from fingerprinting, blocks malicious scripts, and uses AI-powered detection to identify emerging threats in real-time.
+
+```mermaid
+graph TD
+    A[Web Page Load] -->|Network Requests| B(Chrome DeclarativeNetRequest API)
+    B -->|Matches Ad/Tracker Rule| C[Block Connection]
+    B -->|Clean Request| D[Allow Connection]
+    
+    A -->|DOM Loads| E{BlockForge Content Script}
+    E -->|Injects CSS| F[Collapse Ad Containers]
+    E -->|Defuses Popups| G[Intercept window.open]
+    E -->|Canvas/WebGL| H[Randomize Fingerprint]
+    
+    classDef default fill:#1e1e1e,stroke:#333,stroke-width:2px,color:#fff;
+    classDef primary fill:#4285f4,stroke:#2b5cba,stroke-width:2px,color:#fff;
+    classDef blocked fill:#ea4335,stroke:#b31404,stroke-width:2px,color:#fff;
+    classDef allowed fill:#34a853,stroke:#1e8e3e,stroke-width:2px,color:#fff;
+    
+    class A primary
+    class C blocked
+    class D allowed
+```
 
 ### Why BlockForge?
 
