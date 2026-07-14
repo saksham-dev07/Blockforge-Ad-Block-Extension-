@@ -1183,8 +1183,15 @@
           
           // Detect if element is covering a massive portion of the screen
           const isCoveringScreen = rect.width > window.innerWidth * 0.9 && rect.height > window.innerHeight * 0.9;
+          
           // Detect if it is invisible or acting as a high z-index overlay trap
-          const isInvisibleOverlay = style.opacity === '0' || style.backgroundColor === 'rgba(0, 0, 0, 0)' || parseInt(style.zIndex, 10) > 9000;
+          const isAbsoluteOrFixed = style.position === 'absolute' || style.position === 'fixed';
+          const isHighZIndex = parseInt(style.zIndex, 10) > 9000;
+          const isZeroOpacity = style.opacity === '0';
+          const isTransparent = style.backgroundColor === 'rgba(0, 0, 0, 0)' || style.backgroundColor === 'transparent';
+          
+          // Traps must be floating (absolute/fixed/high z-index) AND invisible
+          const isInvisibleOverlay = isZeroOpacity || (isTransparent && (isAbsoluteOrFixed || isHighZIndex));
           
           if (isCoveringScreen && isInvisibleOverlay) {
             e.preventDefault();

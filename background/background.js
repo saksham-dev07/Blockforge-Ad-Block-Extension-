@@ -588,17 +588,13 @@ async function handleMessage(message, sender) {
             if (HTMLCanvasElement.prototype.toDataURL) {
               const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
               HTMLCanvasElement.prototype.toDataURL = function() {
-                try {
-                  const context = this.getContext('2d');
-                  if (context && this.width > 0 && this.height > 0) {
-                    const imageData = context.getImageData(0, 0, this.width, this.height);
-                    for (let i = 0; i < imageData.data.length; i += 4) {
-                      imageData.data[i] += (random() - 0.5) * 2;
-                    }
-                    context.putImageData(imageData, 0, 0);
+                const context = this.getContext('2d');
+                if (context) {
+                  const imageData = context.getImageData(0, 0, this.width, this.height);
+                  for (let i = 0; i < imageData.data.length; i += 4) {
+                    imageData.data[i] += (random() - 0.5) * 2;
                   }
-                } catch (e) {
-                  // Ignore tainted canvas errors
+                  context.putImageData(imageData, 0, 0);
                 }
                 return originalToDataURL.apply(this, arguments);
               };
