@@ -6035,5 +6035,17 @@
         "websocket"
       ]
     }
+  },
+  {
+    "id": 5001,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": { "urlFilter": "||q.quora.com", "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping", "other", "media", "websocket"] }
+  },
+  {
+    "id": 5002,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": { "urlFilter": "||quora.com/qpixel", "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping", "other", "media", "websocket"] }
   }
 ]

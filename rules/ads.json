@@ -5796,21 +5796,61 @@
   {
     "id": 1394,
     "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||yabs.yandex.ru",
-      "resourceTypes": [
-        "script",
-        "image",
-        "xmlhttprequest",
-        "sub_frame",
-        "ping",
-        "other",
-        "media",
-        "websocket"
-      ]
-    }
+    "action": { "type": "block" },
+    "condition": { "urlFilter": "||yabs.yandex.ru", "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping", "other", "media", "websocket"] }
+  },
+  {
+    "id": 4001,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": { "urlFilter": "||nativo.com", "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping", "other", "media", "websocket"] }
+  },
+  {
+    "id": 4002,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": { "urlFilter": "||nativo.net", "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping", "other", "media", "websocket"] }
+  },
+  {
+    "id": 4003,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": { "urlFilter": "||postrelease.com", "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping", "other", "media", "websocket"] }
+  },
+  {
+    "id": 4004,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": { "urlFilter": "||admob.com", "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping", "other", "media", "websocket"] }
+  },
+  {
+    "id": 4005,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": { "urlFilter": "||googleadmob.com", "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping", "other", "media", "websocket"] }
+  },
+  {
+    "id": 4006,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": { "urlFilter": "||mintegral.com", "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping", "other", "media", "websocket"] }
+  },
+  {
+    "id": 4007,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": { "urlFilter": "||mintegral.net", "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping", "other", "media", "websocket"] }
+  },
+  {
+    "id": 4008,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": { "urlFilter": "||mobvista.com", "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping", "other", "media", "websocket"] }
+  },
+  {
+    "id": 4009,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": { "urlFilter": "||rayjump.com", "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping", "other", "media", "websocket"] }
   }
 ]
