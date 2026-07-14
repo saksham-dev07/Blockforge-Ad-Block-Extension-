@@ -453,6 +453,21 @@ async function handleMessage(message, sender) {
   const action = normalizeAction(message);
   console.log('[BlockForge] Message received:', action);
   
+  // SECURITY: Validate message sender
+  // Only allow specific messages from untrusted content scripts.
+  // Sensitive actions (like updateSettings, toggleProtection, blockConnection) MUST originate from an extension page.
+  const isExtensionPage = sender.url && sender.url.startsWith(chrome.runtime.getURL(''));
+  const allowUntrusted = [
+    'injectProtectionScript', 'INJECT_PROTECTION_SCRIPT',
+    'contentScriptReady', 'CONTENT_SCRIPT_READY',
+    'REPORT_DOM_BLOCKED'
+  ];
+  
+  if (!isExtensionPage && !allowUntrusted.includes(action)) {
+    console.warn(`[BlockForge] Security Alert: Blocked unauthorized '${action}' request from untrusted sender:`, sender.url);
+    return { error: 'Unauthorized' };
+  }
+  
   switch (action) {
     case 'injectProtectionScript':
     case 'INJECT_PROTECTION_SCRIPT': {
