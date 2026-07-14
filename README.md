@@ -50,6 +50,9 @@ Unlike traditional blockers, BlockForge goes beyond simple filter lists — it a
 -  **Lightweight & fast** — uses native Chrome APIs for optimal performance
 -  **Privacy-first** — comprehensive anti-fingerprinting protection
 -  **Beautiful UI** — modern glassmorphism design with dark mode
+-  **Live Network Log** — see every allowed & blocked connection in real-time
+-  **Threat Severity Engine** — heuristic-based threat classification
+-  **Advanced Connection Monitor** — firewall-level control over all network requests
 -  **YouTube ad blocking** — automatic skipping and muting of video ads
 
 ---
@@ -103,7 +106,8 @@ BlockForge protects against all major fingerprinting techniques:
 
 Real-time insights into your browsing protection:
 
-- **Live Statistics**: See exactly what''s being blocked as you browse
+- **Live Network Log**: Watch a real-time, auto-trimming stream of every intercepted connection.
+- **Threat Severity Engine**: Trackers are instantly evaluated and categorized into Critical, High, Medium, or Low severity (e.g., Hotjar and Facebook Pixel are flagged as Critical).
 - **Historical Trends**: Charts showing blocks over time (daily, weekly, monthly)
 - **Category Breakdown**: Visual representation of threat types
 - **Top Blocked Domains**: Most frequently blocked trackers and ad networks
@@ -201,33 +205,15 @@ After installation, BlockForge works immediately with zero configuration require
 
 ### Popup Interface
 
-Click the BlockForge icon in your toolbar to access quick controls:
+Click the BlockForge icon in your toolbar to access quick controls via our newly designed app-like glassmorphic UI:
 
-```
+**Central Power Core**:
+- **Toggle Protection**: One-click to enable/disable blocking for the current site with an immersive pulsing glow animation.
 
-    BlockForge                 
-  
-                                 
-  Protection:  [ON]     
-                                 
-   Statistics                  
-   Ads Blocked:      1,247    
-   Trackers:           842    
-   Miners:               7    
-   Malware:              0    
-                                 
-  Current Site: example.com      
-  Status:  Protected            
-                                 
-  [  Settings ] [  Dashboard ]
-  [  Whitelist Site ]           
-
-```
-
-**Quick Actions**:
-- **Toggle Protection**: One-click to enable/disable blocking
-- **View Stats**: Real-time count of blocked items
-- **Whitelist Sites**: Allow all content on trusted domains
+**Bottom Navigation**:
+- **Home Tab**: View your beautifully arranged 2x2 stats grid for the current page (Ads, Trackers, Miners, Malware).
+- **Activity Tab (Advanced Connection Monitor)**: A unified network feed showing both **Blocked** trackers (with severity badges) and **Allowed** third-party connections. Includes one-click **Block** and **Allow** buttons to generate custom Declarative Net Request firewall rules on the fly.
+- **Settings Tab**: Quick toggles to enable/disable specific filters or features like anti-fingerprinting without needing to open the full dashboard.
 - **Access Settings**: Open full configuration panel
 - **View Dashboard**: Detailed analytics and charts
 

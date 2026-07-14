@@ -19,6 +19,7 @@ function getDefaultSettings() {
     antiFingerprint: true,
     httpsUpgrade: true,
     blockThirdPartyCookies: true,
+    blockAnnoyances: true,
     otaEnabled: false,
     customFilters: [],
     whitelist: []
@@ -238,8 +239,35 @@ try {
 let blockBuffer = [];
 let blockBufferTimer = null;
 
+const HIGH_SEVERITY_DOMAINS = [
+  'hotjar', 'clarity', 'fullstory', 'logrocket', 'smartlook', // Session recorders
+  'facebook.com/tr', 'google-analytics', 'mixpanel', 'segment', 'amplitude', // Heavy analytics
+  'doubleclick.net', 'adnxs.com', 'criteo.com', 'taboola', 'outbrain' // Heavy ad/retargeting networks
+];
+
+function determineSeverity(url, type) {
+  if (type === 'malware') return 'critical';
+  if (type === 'miner') return 'high';
+  
+  const urlLower = url.toLowerCase();
+  
+  // Check against known high severity domains
+  for (const domain of HIGH_SEVERITY_DOMAINS) {
+    if (urlLower.includes(domain)) {
+      return type === 'tracker' ? 'critical' : 'high';
+    }
+  }
+  
+  // Default fallbacks based on type
+  if (type === 'tracker') return 'medium';
+  if (type === 'ad') return 'low';
+  
+  return 'low';
+}
+
 function queueBlock(tabId, url, type, source) {
-  blockBuffer.push({ tabId, url, type, source, timestamp: Date.now() });
+  const severity = determineSeverity(url, type);
+  blockBuffer.push({ tabId, url, type, source, severity, timestamp: Date.now() });
   
   if (!blockBufferTimer) {
     blockBufferTimer = setTimeout(flushBlockBuffer, 1000); // Flush every second
@@ -292,6 +320,7 @@ async function flushBlockBuffer() {
         type: item.type,
         source: item.source,
         tabId: item.tabId,
+        severity: item.severity,
         timestamp: item.timestamp
       });
     }
@@ -299,6 +328,21 @@ async function flushBlockBuffer() {
     if (blockLog.length > 500) blockLog.length = 500;
     
     await chrome.storage.local.set({ statistics, dailyStats, blockLog });
+    
+    // Broadcast new blocks for the Live Network Log
+    for (const item of blocksToProcess) {
+      chrome.runtime.sendMessage({
+        type: 'NEW_BLOCK_EVENT',
+        data: {
+          url: item.url.substring(0, 200),
+          type: item.type,
+          source: item.source,
+          tabId: item.tabId,
+          severity: item.severity,
+          timestamp: item.timestamp
+        }
+      }).catch(() => {}); // Ignore errors if dashboard is closed
+    }
     
     // Update badges efficiently
     const tabCounts = new Map();
@@ -587,12 +631,37 @@ async function handleMessage(message, sender) {
       
       // Filter blocks for this tab
       const tabBlocked = tabBlockLog.filter(item => item.tabId === tabId);
+      const tabAllowed = tabAllowedConnections.get(tabId) || [];
       
       return {
         blockedItems: tabBlocked,
+        allowedItems: tabAllowed,
         exceptions: tabExceptions[tabHostname] || [],
         tabStats: tabBlockCounts.get(tabId) || { total: 0, ad: 0, tracker: 0, other: 0 }
       };
+    }
+      
+    case 'blockConnection': {
+      // Dynamically block a domain that was previously allowed
+      const blockHost = message.domain;
+      // We use a dynamic block rule
+      try {
+        await chrome.declarativeNetRequest.updateDynamicRules({
+          addRules: [{
+            id: 800000 + Math.floor(Math.random() * 100000), // Random ID in 800k range for custom blocks
+            priority: 2,
+            action: { type: 'block' },
+            condition: {
+              urlFilter: `||${blockHost}^`,
+              resourceTypes: ['main_frame', 'sub_frame', 'stylesheet', 'script', 'image', 'font', 'object', 'xmlhttprequest', 'ping', 'csp_report', 'media', 'websocket', 'other']
+            }
+          }]
+        });
+        return { success: true };
+      } catch (e) {
+        console.error('Failed to add custom block rule:', e);
+        return { success: false };
+      }
     }
       
     case 'addException': {
@@ -890,13 +959,52 @@ async function removeDynamicAllowRule(url) {
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
   if (changeInfo.status === 'loading') {
     tabBlockCounts.delete(tabId);
+    tabAllowedConnections.delete(tabId);
   }
 });
 
 // Handle tab removal - cleanup
 chrome.tabs.onRemoved.addListener((tabId) => {
   tabBlockCounts.delete(tabId);
+  tabAllowedConnections.delete(tabId);
 });
+
+// Advanced Network Monitor
+const tabAllowedConnections = new Map();
+
+function getHostFromUrl(url) {
+  try { return new URL(url).hostname; } catch(e) { return ''; }
+}
+
+if (chrome.webRequest && chrome.webRequest.onBeforeRequest) {
+  chrome.webRequest.onBeforeRequest.addListener((details) => {
+    if (!isEnabled || details.tabId <= 0 || !details.url.startsWith('http')) return;
+    
+    const tabId = details.tabId;
+    const targetHost = getHostFromUrl(details.url);
+    const initiatorHost = details.initiator ? getHostFromUrl(details.initiator) : '';
+    
+    // Only track third-party connections
+    if (targetHost && initiatorHost && !targetHost.endsWith(initiatorHost) && !initiatorHost.endsWith(targetHost)) {
+      let connections = tabAllowedConnections.get(tabId) || [];
+      
+      // Only log unique target domains per tab
+      if (!connections.some(c => getHostFromUrl(c.url) === targetHost)) {
+        connections.push({
+          url: details.url,
+          type: 'allowed',
+          source: details.initiator,
+          tabId: tabId,
+          timestamp: Date.now()
+        });
+        
+        // Cap at 100 to prevent memory leaks
+        if (connections.length > 100) connections.shift();
+        tabAllowedConnections.set(tabId, connections);
+      }
+    }
+  }, { urls: ["<all_urls>"] });
+}
 
 // Handle installation
 chrome.runtime.onInstalled.addListener(async (details) => {
@@ -933,7 +1041,11 @@ initialize();
 // ==========================================
 // OTA UPDATES
 // ==========================================
-const OTA_URL = "https://raw.githubusercontent.com/saksham-dev07/blockforge/main/ota-rules.json";
+const USE_LOCAL_TESTING = false; // Change this to false before publishing to Chrome Web Store!
+const OTA_URL = USE_LOCAL_TESTING 
+  ? "http://localhost:8080/ota-rules.json"
+  : "https://raw.githubusercontent.com/saksham-dev07/blockforge/main/ota-rules.json";
+
 const OTA_ALARM_NAME = "checkOTAUpdates";
 const OTA_INTERVAL_MINUTES = 24 * 60; // 24 hours
 

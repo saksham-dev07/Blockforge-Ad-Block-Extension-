@@ -176,7 +176,15 @@
   function startProtection() {
     if (!config.enabled || config.isWhitelisted) {
       console.log('[BlockForge] Protection disabled for this site');
+      document.documentElement.classList.remove('blockforge-annoyances-enabled');
       return;
+    }
+    
+    // Toggle Annoyances Filter
+    if (config.settings.blockAnnoyances) {
+      document.documentElement.classList.add('blockforge-annoyances-enabled');
+    } else {
+      document.documentElement.classList.remove('blockforge-annoyances-enabled');
     }
     
     // Inject fingerprint protection via background (MAIN world, CSP-safe)
@@ -327,7 +335,19 @@
         config.enabled = message.config.enabled;
         config.settings = message.config.settings;
         config.isWhitelisted = message.config.isWhitelisted;
-        if (config.enabled && !config.isWhitelisted) startProtection();
+        if (config.enabled && !config.isWhitelisted) {
+          startProtection();
+        } else {
+          document.documentElement.classList.remove('blockforge-annoyances-enabled');
+        }
+        
+        // Dynamically toggle annoyances if already running
+        if (config.settings.blockAnnoyances) {
+          document.documentElement.classList.add('blockforge-annoyances-enabled');
+        } else {
+          document.documentElement.classList.remove('blockforge-annoyances-enabled');
+        }
+        
         sendResponse({ success: true });
         break;
       case 'UPDATE_FINGERPRINT_PROTECTION':

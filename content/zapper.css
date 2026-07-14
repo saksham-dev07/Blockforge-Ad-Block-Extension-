@@ -1,0 +1,10 @@
+/* BlockForge Element Zapper Styles */
+
+.blockforge-zapper-highlight {
+  outline: 2px dashed #ff4757 !important;
+  outline-offset: -2px !important;
+  background-color: rgba(255, 71, 87, 0.15) !important;
+  cursor: crosshair !important;
+  z-index: 2147483647 !important;
+  transition: outline 0.1s, background-color 0.1s !important;
+}

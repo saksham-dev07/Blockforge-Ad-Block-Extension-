@@ -8,6 +8,7 @@ let currentTab = null;
 let currentHostname = '';
 let isEnabled = true;
 let siteBlocked = [];
+let siteAllowed = [];
 let siteExceptions = [];
 let currentTabStats = null;
 
@@ -91,12 +92,12 @@ async function loadSiteData() {
     const isWhitelisted = whitelist.includes(currentHostname);
     updateSiteStatus(isWhitelisted);
     
-    // Update settings toggles
-    ['Ads', 'Trackers', 'Miners', 'Fingerprint', 'OTA'].forEach(setting => {
+    ['Ads', 'Trackers', 'Miners', 'Fingerprint', 'Annoyances', 'OTA'].forEach(setting => {
       const toggle = document.getElementById(`toggle${setting}`);
       if (toggle) {
         let key = `block${setting}`;
         if (setting === 'Fingerprint') key = 'antiFingerprint';
+        if (setting === 'Annoyances') key = 'blockAnnoyances';
         if (setting === 'OTA') key = 'otaEnabled';
         if (settings[key] !== undefined) toggle.checked = settings[key];
       }
@@ -128,6 +129,7 @@ async function loadBlockedItems() {
     
     if (response?.blockedItems) {
       siteBlocked = response.blockedItems;
+      siteAllowed = response.allowedItems || [];
       siteExceptions = response.exceptions || [];
       currentTabStats = response.tabStats || null;
     } else {
@@ -170,10 +172,19 @@ async function loadBlockedItems() {
  */
 function updatePowerButton() {
   const powerBtn = document.getElementById('powerBtn');
-  if (isEnabled) {
-    powerBtn.classList.remove('disabled');
-  } else {
-    powerBtn.classList.add('disabled');
+  const siteStatusText = document.getElementById('siteStatusText');
+  const statusDot = document.getElementById('siteStatusDot');
+  
+  if (powerBtn) {
+    if (isEnabled) {
+      powerBtn.classList.add('active');
+      if (siteStatusText) siteStatusText.textContent = 'Protection Active';
+      if (statusDot) statusDot.className = 'status-dot active';
+    } else {
+      powerBtn.classList.remove('active');
+      if (siteStatusText) siteStatusText.textContent = 'Protection Disabled';
+      if (statusDot) statusDot.className = 'status-dot';
+    }
   }
 }
 
@@ -181,21 +192,18 @@ function updatePowerButton() {
  * Update site status display
  */
 function updateSiteStatus(isWhitelisted) {
-  const statusDot = document.querySelector('.site-status .status-dot');
-  const statusText = document.querySelector('.site-status .status-text');
-  const toggleIcon = document.getElementById('siteToggleIcon');
+  const siteStatusText = document.getElementById('siteStatusText');
+  const statusDot = document.getElementById('siteStatusDot');
   const toggleBtn = document.getElementById('siteToggleBtn');
   
   if (isWhitelisted) {
-    statusDot.className = 'status-dot inactive';
-    statusText.textContent = 'Not Protected (Whitelisted)';
-    toggleIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
-    toggleBtn.classList.add('whitelisted');
+    if (siteStatusText) siteStatusText.textContent = 'Site Allowed';
+    if (statusDot) statusDot.className = 'status-dot';
+    if (toggleBtn) toggleBtn.classList.add('whitelisted');
   } else {
-    statusDot.className = 'status-dot active';
-    statusText.textContent = 'Protected';
-    toggleIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-    toggleBtn.classList.remove('whitelisted');
+    // If not whitelisted, the global state dictates status.
+    updatePowerButton();
+    if (toggleBtn) toggleBtn.classList.remove('whitelisted');
   }
 }
 
@@ -213,24 +221,35 @@ function updateGlobalStats(stats) {
  * Update page-specific stats
  */
 function updatePageStats() {
-  let total = 0, ads = 0, trackers = 0, other = 0;
+  let total = 0, ads = 0, trackers = 0, miners = 0, malware = 0, other = 0;
   
   if (currentTabStats) {
     total = currentTabStats.total || 0;
     ads = currentTabStats.ad || 0;
     trackers = currentTabStats.tracker || 0;
+    miners = currentTabStats.miner || 0;
+    malware = currentTabStats.malware || 0;
     other = currentTabStats.other || 0;
   } else {
     total = siteBlocked.length;
     ads = siteBlocked.filter(i => i.type === 'ad').length;
     trackers = siteBlocked.filter(i => i.type === 'tracker').length;
-    other = total - ads - trackers;
+    miners = siteBlocked.filter(i => i.type === 'miner').length;
+    malware = siteBlocked.filter(i => i.type === 'malware').length;
+    other = total - ads - trackers - miners - malware;
   }
   
-  document.getElementById('pageTotal').textContent = total;
-  document.getElementById('pageAds').textContent = ads;
-  document.getElementById('pageTrackers').textContent = trackers;
-  document.getElementById('pageOther').textContent = other;
+  const setEl = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+
+  setEl('pageTotal', total);
+  setEl('pageAds', ads);
+  setEl('pageTrackers', trackers);
+  setEl('pageMiners', miners);
+  setEl('pageMalware', malware);
+  setEl('pageOther', other);
 }
 
 /**
@@ -239,13 +258,14 @@ function updatePageStats() {
 function updateBlockedList(filter = 'all') {
   const container = document.getElementById('blockedList');
   
-  let items = siteBlocked;
+  let items = [...siteBlocked, ...siteAllowed].sort((a, b) => b.timestamp - a.timestamp);
+  
   if (filter !== 'all') {
     items = items.filter(i => i.type === filter);
   }
   
   if (items.length === 0) {
-    container.innerHTML = '<div class="empty-state">No items blocked yet on this page</div>';
+    container.innerHTML = '<div class="empty-state">No network activity recorded yet on this page</div>';
     return;
   }
   
@@ -257,15 +277,23 @@ function updateBlockedList(filter = 'all') {
     const domain = escapeHTML(extractDomain(item.url));
     const typeClass = escapeHTML(item.type || 'unknown');
     const typeLabel = escapeHTML((item.type || 'unknown').charAt(0).toUpperCase() + (item.type || 'unknown').slice(1));
+    const severity = escapeHTML(item.severity || 'low');
+    const severityLabel = severity.charAt(0).toUpperCase() + severity.slice(1);
     const safeUrl = escapeHTML(item.url);
     const shortUrl = escapeHTML(item.url.length > 60 ? item.url.substring(0, 60) + '...' : item.url);
+    
+    const isAllowed = item.type === 'allowed';
     
     html += `
       <div class="blocked-item" data-index="${index}">
         <div class="blocked-item-header">
-          <span class="blocked-type ${typeClass}">${typeLabel}</span>
+          <span class="blocked-type ${typeClass}">${isAllowed ? 'Allowed' : typeLabel}</span>
+          ${!isAllowed ? `<span class="severity-badge severity-${severity}">${severityLabel}</span>` : ''}
           <span class="blocked-domain">${domain}</span>
-          <button class="unblock-btn" data-url="${encodeURIComponent(item.url)}" title="Allow this"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></button>
+          ${isAllowed 
+            ? `<button class="block-btn" data-domain="${encodeURIComponent(domain)}" title="Block this domain"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg></button>`
+            : `<button class="unblock-btn" data-url="${encodeURIComponent(item.url)}" title="Allow this"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></button>`
+          }
         </div>
         <div class="blocked-url" title="${safeUrl}">${shortUrl}</div>
       </div>
@@ -274,12 +302,20 @@ function updateBlockedList(filter = 'all') {
   
   container.innerHTML = html;
   
-  // Add unblock handlers
+  // Add handlers
   container.querySelectorAll('.unblock-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const url = decodeURIComponent(btn.dataset.url);
       addException(url);
+    });
+  });
+  
+  container.querySelectorAll('.block-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const domain = decodeURIComponent(btn.dataset.domain);
+      blockConnection(domain);
     });
   });
 }
@@ -376,6 +412,30 @@ async function removeException(index) {
 }
 
 /**
+ * Block an allowed connection
+ */
+async function blockConnection(domain) {
+  try {
+    const response = await safeSendMessage({
+      action: 'blockConnection',
+      domain: domain
+    });
+    
+    if (response?.success) {
+      showToast(`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg> ${domain} blocked! Reload page to apply.`, 'warning');
+      
+      // Update local array for immediate UI feedback
+      siteAllowed = siteAllowed.filter(i => extractDomain(i.url) !== domain);
+      siteBlocked.unshift({ url: `https://${domain}`, type: 'tracker', severity: 'high', timestamp: Date.now() });
+      updateBlockedList();
+    }
+  } catch (error) {
+    console.error('Block connection error:', error);
+    showToast('Failed to block domain');
+  }
+}
+
+/**
  * Extract pattern from URL
  */
 function extractPattern(url) {
@@ -461,12 +521,13 @@ function setupEventListeners() {
   });
   
   // Settings toggles
-  ['Ads', 'Trackers', 'Miners', 'Fingerprint', 'OTA'].forEach(setting => {
+  ['Ads', 'Trackers', 'Miners', 'Fingerprint', 'Annoyances', 'OTA'].forEach(setting => {
     const toggle = document.getElementById(`toggle${setting}`);
     if (toggle) {
       toggle.addEventListener('change', async (e) => {
         let key = `block${setting}`;
         if (setting === 'Fingerprint') key = 'antiFingerprint';
+        if (setting === 'Annoyances') key = 'blockAnnoyances';
         if (setting === 'OTA') key = 'otaEnabled';
         
         await safeSendMessage({
@@ -477,6 +538,31 @@ function setupEventListeners() {
     }
   });
   
+  // Zapper Actions
+  const zapBtn = document.getElementById('zapElementBtn');
+  if (zapBtn) {
+    zapBtn.addEventListener('click', () => {
+      if (currentTab?.id) {
+        chrome.tabs.sendMessage(currentTab.id, { type: 'ACTIVATE_ZAPPER' }).catch(err => {
+          console.warn('Could not activate zapper on this page', err);
+        });
+        window.close();
+      }
+    });
+  }
+
+  const clearZapperBtn = document.getElementById('clearZapperBtn');
+  if (clearZapperBtn) {
+    clearZapperBtn.addEventListener('click', () => {
+      if (currentTab?.id) {
+        chrome.tabs.sendMessage(currentTab.id, { type: 'CLEAR_ZAPPER' }).catch(err => {
+          console.warn('Could not clear zapper on this page', err);
+        });
+        showToast('Zapper rules cleared for this site');
+      }
+    });
+  }
+
   // Action buttons
   document.getElementById('openDashboard').addEventListener('click', () => {
     chrome.tabs.create({ url: chrome.runtime.getURL('dashboard/dashboard.html') });
@@ -500,7 +586,7 @@ function setupEventListeners() {
  * Setup tabs
  */
 function setupTabs() {
-  const tabBtns = document.querySelectorAll('.tab-btn');
+  const tabBtns = document.querySelectorAll('.nav-item');
   const tabContents = document.querySelectorAll('.tab-content');
   
   tabBtns.forEach(btn => {

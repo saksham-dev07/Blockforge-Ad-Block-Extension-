@@ -114,6 +114,33 @@
         </div>
       </section>
 
+      <!-- Live Network Log -->
+      <section class="live-log-section">
+        <div class="section-header">
+          <h2 class="section-title"><span class="live-pulse"></span> Live Network Log</h2>
+          <div class="log-actions">
+            <span class="log-status">Intercepting requests...</span>
+          </div>
+        </div>
+        <div class="log-table-container">
+          <table class="log-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Type</th>
+                <th>Severity</th>
+                <th>Source Domain</th>
+                <th>Target URL</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="liveLogBody">
+              <!-- Rows will be dynamically injected here -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- Charts Row 1 -->
       <section class="charts-row">
         <!-- Category Breakdown -->

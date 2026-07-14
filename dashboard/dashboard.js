@@ -108,6 +108,7 @@ function updateUI() {
   updateTopSites();
   updateRequestTypes();
   updatePrivacyScore();
+  renderLiveLogTable();
 }
 
 /**
@@ -636,7 +637,102 @@ function setupEventListeners() {
   document.getElementById('trendsRange')?.addEventListener('change', updateTrendsChart);
   
   // Category time range selector
+  // Category time range selector
   document.getElementById('categoryTimeRange')?.addEventListener('change', updateCategoryChart);
+  
+  // Listen for live block events from background
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message.type === 'NEW_BLOCK_EVENT' && message.data) {
+      addLiveLogRow(message.data, true);
+    }
+  });
+}
+
+// ============================================================================
+// LIVE NETWORK LOG
+// ============================================================================
+
+/**
+ * Render the live network log table
+ */
+function renderLiveLogTable() {
+  const tbody = document.getElementById('liveLogBody');
+  if (!tbody) return;
+  
+  tbody.innerHTML = '';
+  
+  // Only render up to 100 items initially to keep DOM light
+  const itemsToRender = blockLog.slice(0, 100);
+  
+  if (itemsToRender.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #71717a; padding: 20px;">No blocks recorded yet in this session.</td></tr>';
+    return;
+  }
+  
+  itemsToRender.forEach(block => addLiveLogRow(block, false));
+}
+
+/**
+ * Add a single row to the live log table
+ */
+function addLiveLogRow(block, prepend = false) {
+  const tbody = document.getElementById('liveLogBody');
+  if (!tbody) return;
+  
+  // Remove the "No blocks" message if it exists
+  if (tbody.children.length === 1 && tbody.firstElementChild.innerText.includes('No blocks recorded')) {
+    tbody.innerHTML = '';
+  }
+  
+  const tr = document.createElement('tr');
+  
+  // Format time
+  const date = new Date(block.timestamp || Date.now());
+  const timeStr = date.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  
+  // Badge styling
+  let badgeClass = 'badge-other';
+  let badgeText = 'Other';
+  
+  if (block.type === 'ad') { badgeClass = 'badge-ad'; badgeText = 'Ad'; }
+  else if (block.type === 'tracker') { badgeClass = 'badge-tracker'; badgeText = 'Tracker'; }
+  else if (block.type === 'miner') { badgeClass = 'badge-miner'; badgeText = 'Miner'; }
+  else if (block.type === 'malware') { badgeClass = 'badge-malware'; badgeText = 'Malware'; }
+  
+  // Severity Mapping
+  const severity = block.severity || 'low';
+  const severityClass = `badge-${severity}`;
+  const severityText = severity.charAt(0).toUpperCase() + severity.slice(1);
+  
+  // Safe extraction of domains/urls
+  const sourceDomain = block.source ? escapeHTML(extractDomain(block.source)) : 'Unknown';
+  const targetUrl = escapeHTML(block.url || 'Unknown');
+  const safeDomain = escapeHTML(extractDomain(block.url || ''));
+  
+  tr.innerHTML = `
+    <td class="col-time">${timeStr}</td>
+    <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+    <td><span class="badge ${severityClass}">${severityText}</span></td>
+    <td class="col-domain" title="${escapeHTML(block.source)}">${sourceDomain}</td>
+    <td class="col-url" title="${targetUrl}">${targetUrl}</td>
+    <td>
+      <button class="action-btn-small" onclick="window.addException('${safeDomain}')" title="Allow Domain">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </button>
+    </td>
+  `;
+  
+  if (prepend) {
+    tr.classList.add('new-row-glow');
+    tbody.prepend(tr);
+    
+    // Trim DOM if it exceeds 100 rows
+    if (tbody.children.length > 100) {
+      tbody.lastElementChild.remove();
+    }
+  } else {
+    tbody.appendChild(tr);
+  }
 }
 
 /**

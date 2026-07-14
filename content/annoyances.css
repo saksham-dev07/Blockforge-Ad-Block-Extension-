@@ -1,0 +1,44 @@
+/* BlockForge Cookie Notice Annihilator
+   Automatically hides common cookie banners, GDPR notices, and privacy popups.
+   This stylesheet is only active when the root HTML element has the `.blockforge-annoyances-enabled` class.
+*/
+
+:root.blockforge-annoyances-enabled #cookie-notice,
+:root.blockforge-annoyances-enabled #cookie-banner,
+:root.blockforge-annoyances-enabled #cookie-consent,
+:root.blockforge-annoyances-enabled #cookie-law-info-bar,
+:root.blockforge-annoyances-enabled #CybotCookiebotDialog,
+:root.blockforge-annoyances-enabled #didomi-host,
+:root.blockforge-annoyances-enabled #onetrust-consent-sdk,
+:root.blockforge-annoyances-enabled #usercentrics-root,
+:root.blockforge-annoyances-enabled #ez-cookie-dialog-wrapper,
+:root.blockforge-annoyances-enabled #tarteaucitronRoot,
+:root.blockforge-annoyances-enabled .cc-window,
+:root.blockforge-annoyances-enabled .cookie-banner,
+:root.blockforge-annoyances-enabled .cookie-consent,
+:root.blockforge-annoyances-enabled .cookie-notice,
+:root.blockforge-annoyances-enabled .fc-consent-root,
+:root.blockforge-annoyances-enabled .qc-cmp2-container,
+:root.blockforge-annoyances-enabled .trustarc-banner,
+:root.blockforge-annoyances-enabled .osano-cm-window,
+:root.blockforge-annoyances-enabled .cookie-alert,
+:root.blockforge-annoyances-enabled .cookie-popup,
+:root.blockforge-annoyances-enabled .cookie-wrapper,
+:root.blockforge-annoyances-enabled [id*="cookie-banner"],
+:root.blockforge-annoyances-enabled [class*="cookie-banner"],
+:root.blockforge-annoyances-enabled [id*="cookie-consent"],
+:root.blockforge-annoyances-enabled [class*="cookie-consent"],
+:root.blockforge-annoyances-enabled [id*="cookie-notice"],
+:root.blockforge-annoyances-enabled [class*="cookie-notice"],
+:root.blockforge-annoyances-enabled [id*="cookieConsent"],
+:root.blockforge-annoyances-enabled [class*="cookieConsent"],
+:root.blockforge-annoyances-enabled [id*="gdpr-banner"],
+:root.blockforge-annoyances-enabled [class*="gdpr-banner"],
+:root.blockforge-annoyances-enabled [id*="gdpr-consent"],
+:root.blockforge-annoyances-enabled [class*="gdpr-consent"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    z-index: -2147483648 !important;
+}

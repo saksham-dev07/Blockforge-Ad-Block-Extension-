@@ -13,211 +13,199 @@
 </head>
 <body>
   <div class="popup-container">
-    <!-- Header -->
+    
+    <!-- Top Header (Simplified) -->
     <header class="header">
       <div class="logo">
-        <div class="logo-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
+        <div class="logo-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
         <div class="logo-text">
           <span class="brand">BlockForge</span>
         </div>
       </div>
-      <button class="power-btn" id="powerBtn" title="Toggle Protection">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2v10M18.4 6.6a9 9 0 1 1-12.8 0"/>
-        </svg>
-      </button>
+      <div class="site-info-pill">
+        <span class="status-dot active" id="siteStatusDot"></span>
+        <span class="site-hostname" id="hostname">Loading...</span>
+      </div>
     </header>
 
-    <!-- Current Site Section -->
-    <div class="site-section">
-      <div class="site-header">
-        <div class="site-info">
-          <span class="site-label">Current Site</span>
-          <span class="site-hostname" id="hostname">Loading...</span>
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- TAB: OVERVIEW -->
+      <div class="tab-content active" id="tab-overview">
+        
+        <!-- Central Power Core -->
+        <div class="power-core-container">
+          <button class="power-core active" id="powerBtn" title="Toggle Protection">
+            <div class="power-ring"></div>
+            <div class="power-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+              </svg>
+            </div>
+          </button>
+          <div class="core-status" id="siteStatusText">Protection Active</div>
         </div>
-        <button class="site-toggle-btn" id="siteToggleBtn" title="Toggle protection for this site">
-          <span id="siteToggleIcon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
-        </button>
-      </div>
-      <div class="site-status" id="siteStatus">
-        <span class="status-dot active"></span>
-        <span class="status-text">Protected</span>
-      </div>
-    </div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="overview">Overview</button>
-      <button class="tab-btn" data-tab="blocked">Blocked (<span id="blockedCount">0</span>)</button>
-      <button class="tab-btn" data-tab="settings">Settings</button>
-    </div>
-
-    <!-- Tab Content: Overview -->
-    <div class="tab-content active" id="tab-overview">
-      <!-- This Page Stats -->
-      <div class="stats-section">
-        <h3 class="section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> This Page</h3>
-        <div class="page-stats">
-          <div class="page-stat">
-            <span class="page-stat-value" id="pageTotal">0</span>
-            <span class="page-stat-label">Blocked</span>
-          </div>
-          <div class="page-stat">
-            <span class="page-stat-value" id="pageAds">0</span>
-            <span class="page-stat-label">Ads</span>
-          </div>
-          <div class="page-stat">
-            <span class="page-stat-value" id="pageTrackers">0</span>
-            <span class="page-stat-label">Trackers</span>
-          </div>
-          <div class="page-stat">
-            <span class="page-stat-value" id="pageOther">0</span>
-            <span class="page-stat-label">Other</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Global Stats -->
-      <div class="stats-section">
-        <h3 class="section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg> All Time</h3>
-        <div class="global-stats">
-          <div class="global-stat">
-            <div class="global-stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
-            <div class="global-stat-info">
-              <span class="global-stat-value" id="totalBlocked">0</span>
-              <span class="global-stat-label">Total Blocked</span>
+        <!-- 2x2 Stats Grid -->
+        <div class="stats-grid-2x2">
+          <div class="grid-card stat-ads">
+            <div class="grid-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon></svg></div>
+            <div class="grid-data">
+              <span class="grid-value" id="pageAds">0</span>
+              <span class="grid-label">Ads</span>
             </div>
           </div>
-          <div class="global-stat">
-            <div class="global-stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></div>
-            <div class="global-stat-info">
-              <span class="global-stat-value" id="totalAds">0</span>
-              <span class="global-stat-label">Ads</span>
+          <div class="grid-card stat-trackers">
+            <div class="grid-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path></svg></div>
+            <div class="grid-data">
+              <span class="grid-value" id="pageTrackers">0</span>
+              <span class="grid-label">Trackers</span>
             </div>
           </div>
-          <div class="global-stat">
-            <div class="global-stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></div>
-            <div class="global-stat-info">
-              <span class="global-stat-value" id="totalTrackers">0</span>
-              <span class="global-stat-label">Trackers</span>
+          <div class="grid-card stat-miners">
+            <div class="grid-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 14l-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 11"></path></svg></div>
+            <div class="grid-data">
+              <span class="grid-value" id="pageMiners">0</span>
+              <span class="grid-label">Miners</span>
             </div>
           </div>
-          <div class="global-stat">
-            <div class="global-stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg></div>
-            <div class="global-stat-info">
-              <span class="global-stat-value" id="dataSaved">0 B</span>
-              <span class="global-stat-label">Data Saved</span>
+          <div class="grid-card stat-malware">
+            <div class="grid-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
+            <div class="grid-data">
+              <span class="grid-value" id="pageMalware">0</span>
+              <span class="grid-label">Malware</span>
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Tab Content: Blocked Items -->
-    <div class="tab-content" id="tab-blocked">
-      <div class="blocked-section">
-        <div class="blocked-header">
-          <h3 class="section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg> Blocked on this page</h3>
-          <button class="refresh-btn" id="refreshBlockedBtn" title="Refresh"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+        <div class="actions-section">
+          <button class="action-btn zap" id="zapElementBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            Zap Element
+          </button>
         </div>
-        <div class="blocked-filter">
-          <label for="blockedFilter" class="visually-hidden">Filter blocked items by type</label>
-          <select id="blockedFilter" title="Filter blocked items by type">
-            <option value="all">All Types</option>
-            <option value="ad">Ads</option>
-            <option value="tracker">Trackers</option>
-            <option value="miner">Miners</option>
-            <option value="malware">Malware</option>
-          </select>
-        </div>
-        <div class="blocked-list" id="blockedList">
-          <div class="empty-state">No items blocked yet on this page</div>
+        
+        <!-- Total Blocked (Global) Hidden in the new UI, but JS needs the elements so we hide them gracefully -->
+        <div style="display:none">
+            <span id="pageTotal">0</span>
+            <span id="pageOther">0</span>
+            <span id="totalBlocked">0</span>
+            <span id="totalAds">0</span>
+            <span id="totalTrackers">0</span>
+            <span id="dataSaved">0</span>
         </div>
       </div>
 
-      <!-- Custom Unblocks -->
-      <div class="unblocks-section">
-        <h3 class="section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Allowed on this site</h3>
-        <div class="unblocked-list" id="unblockedList">
-          <div class="empty-state">No custom exceptions</div>
+      <!-- TAB: BLOCKED ITEMS -->
+      <div class="tab-content" id="tab-blocked">
+        <div class="blocked-section">
+          <div class="blocked-header">
+            <h3 class="section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg> Activity on this page (<span id="blockedCount">0</span>)</h3>
+            <button class="refresh-btn" id="refreshBlockedBtn" title="Refresh"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+          </div>
+          <div class="blocked-filter">
+            <select id="blockedFilter" title="Filter blocked items by type">
+              <option value="all">All Types</option>
+              <option value="ad">Ads</option>
+              <option value="tracker">Trackers</option>
+              <option value="miner">Miners</option>
+              <option value="malware">Malware</option>
+            </select>
+          </div>
+          <div class="blocked-list glass-panel" id="blockedList">
+            <div class="empty-state">No items blocked yet</div>
+          </div>
         </div>
-        <div class="add-exception">
-          <input type="text" id="exceptionInput" placeholder="Enter URL pattern to allow...">
-          <button class="add-btn" id="addExceptionBtn">Add</button>
+
+        <div class="unblocks-section">
+          <h3 class="section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Allowed Sites/Rules</h3>
+          <div class="unblocked-list glass-panel" id="unblockedList">
+            <div class="empty-state">No custom exceptions</div>
+          </div>
+          <div class="add-exception glass-panel">
+            <input type="text" id="exceptionInput" placeholder="Enter URL pattern...">
+            <button class="add-btn" id="addExceptionBtn">Allow</button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Tab Content: Settings -->
-    <div class="tab-content" id="tab-settings">
-      <div class="settings-section">
-        <h3 class="section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Quick Settings</h3>
-        <div class="settings-list">
-          <div class="setting-item">
-            <div class="setting-info">
-              <span class="setting-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></span>
+      <!-- TAB: SETTINGS -->
+      <div class="tab-content" id="tab-settings">
+        <div class="settings-section">
+          <h3 class="section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Quick Settings</h3>
+          
+          <div class="settings-grid">
+            <label class="setting-card glass-panel" for="toggleAds">
+              <span class="setting-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon></svg></span>
               <span class="setting-name">Block Ads</span>
-            </div>
-            <label class="toggle" for="toggleAds">
-              <input type="checkbox" id="toggleAds" checked title="Toggle ad blocking">
-              <span class="toggle-slider"></span>
+              <div class="toggle"><input type="checkbox" id="toggleAds" checked><span class="toggle-slider"></span></div>
             </label>
-          </div>
-          <div class="setting-item">
-            <div class="setting-info">
-              <span class="setting-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+            <label class="setting-card glass-panel" for="toggleTrackers">
+              <span class="setting-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path></svg></span>
               <span class="setting-name">Block Trackers</span>
-            </div>
-            <label class="toggle" for="toggleTrackers">
-              <input type="checkbox" id="toggleTrackers" checked title="Toggle tracker blocking">
-              <span class="toggle-slider"></span>
+              <div class="toggle"><input type="checkbox" id="toggleTrackers" checked><span class="toggle-slider"></span></div>
             </label>
-          </div>
-          <div class="setting-item">
-            <div class="setting-info">
-              <span class="setting-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14l-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 11"></path><path d="M17.64 15L22 10.64"></path><path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25v-.86L16.01 4.6a5.56 5.56 0 0 0-3.94-1.64H11.2l-2.8 2.8c-.8.8-.8 2.1 0 2.9l8 8c.8.8 2.1.8 2.9 0l1.6-1.6c.8-.8.8-2.1 0-2.9Z"></path></svg></span>
+            <label class="setting-card glass-panel" for="toggleMiners">
+              <span class="setting-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 14l-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 11"></path></svg></span>
               <span class="setting-name">Block Miners</span>
-            </div>
-            <label class="toggle" for="toggleMiners">
-              <input type="checkbox" id="toggleMiners" checked title="Toggle crypto miner blocking">
-              <span class="toggle-slider"></span>
+              <div class="toggle"><input type="checkbox" id="toggleMiners" checked><span class="toggle-slider"></span></div>
             </label>
-          </div>
-          <div class="setting-item">
-            <div class="setting-info">
-              <span class="setting-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>
+            <label class="setting-card glass-panel" for="toggleFingerprint">
+              <span class="setting-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect></svg></span>
               <span class="setting-name">Anti-Fingerprint</span>
-            </div>
-            <label class="toggle" for="toggleFingerprint">
-              <input type="checkbox" id="toggleFingerprint" checked title="Toggle anti-fingerprinting protection">
-              <span class="toggle-slider"></span>
+              <div class="toggle"><input type="checkbox" id="toggleFingerprint" checked><span class="toggle-slider"></span></div>
             </label>
-          </div>
-          <div class="setting-item">
-            <div class="setting-info">
-              <span class="setting-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.13 15.57a10 10 0 1 0 3.43-11.44l-5.06 5.06"></path></svg></span>
-              <span class="setting-name">Auto-Update Filters</span>
-            </div>
-            <label class="toggle" for="toggleOTA">
-              <input type="checkbox" id="toggleOTA" title="Toggle automatic over-the-air filter updates">
-              <span class="toggle-slider"></span>
+            <label class="setting-card glass-panel" for="toggleAnnoyances">
+              <span class="setting-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg></span>
+              <span class="setting-name">Block Annoyances</span>
+              <div class="toggle"><input type="checkbox" id="toggleAnnoyances" checked><span class="toggle-slider"></span></div>
+            </label>
+            <label class="setting-card glass-panel" for="toggleOTA">
+              <span class="setting-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.13 15.57a10 10 0 1 0 3.43-11.44l-5.06 5.06"></path></svg></span>
+              <span class="setting-name">Auto-Update</span>
+              <div class="toggle"><input type="checkbox" id="toggleOTA"><span class="toggle-slider"></span></div>
             </label>
           </div>
         </div>
-      </div>
 
-      <div class="actions-section">
-        <button class="action-btn" id="openDashboard"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg> Open Dashboard</button>
-        <button class="action-btn" id="openSettings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg> All Settings</button>
-        <button class="action-btn danger" id="resetStats"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Reset Stats</button>
+        <div class="actions-section">
+          <button class="action-btn" id="openDashboard">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg> 
+            Analytics Dashboard
+          </button>
+          <button class="action-btn" id="openSettings">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> 
+            All Settings
+          </button>
+          <button class="action-btn" id="clearZapperBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg> 
+            Clear Zapped Elements
+          </button>
+        </div>
       </div>
-    </div>
+      
+    </main>
 
-    <!-- Footer -->
-    <footer class="footer">
-      <span class="version">v1.0.0</span>
-    </footer>
+    <!-- Floating Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-tab="overview">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Overview</span>
+      </button>
+      <button class="nav-item" data-tab="blocked">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        <span>Activity</span>
+      </button>
+      <button class="nav-item" data-tab="settings">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <span>Settings</span>
+      </button>
+    </nav>
   </div>
+
+  <button id="siteToggleBtn" style="display:none"></button>
+  <button id="resetStats" style="display:none"></button>
 
   <script src="../shared/utils.js"></script>
   <script src="popup.js"></script>
