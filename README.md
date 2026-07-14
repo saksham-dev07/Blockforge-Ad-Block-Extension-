@@ -44,14 +44,14 @@ Unlike traditional blockers, BlockForge goes beyond simple filter lists â€”
 
 ```mermaid
 graph TD
-    A[Web Page Load] -->|Network Requests| B(Chrome DeclarativeNetRequest API)
-    B -->|Matches Ad/Tracker Rule| C[Block Connection]
+    A[Web Page Load] -->|Network Requests| B[Chrome DeclarativeNetRequest]
+    B -->|Matches Rule| C[Block Connection]
     B -->|Clean Request| D[Allow Connection]
     
-    A -->|DOM Loads| E{BlockForge Content Script}
+    A -->|DOM Loads| E[BlockForge Content Script]
     E -->|Injects CSS| F[Collapse Ad Containers]
-    E -->|Defuses Popups| G[Intercept window.open]
-    E -->|Canvas/WebGL| H[Randomize Fingerprint]
+    E -->|Defuses Popups| G[Intercept Popups]
+    E -->|Fingerprinting| H[Randomize Signatures]
     
     classDef default fill:#1e1e1e,stroke:#333,stroke-width:2px,color:#fff;
     classDef primary fill:#4285f4,stroke:#2b5cba,stroke-width:2px,color:#fff;
