@@ -9,7 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-FFC107?style=flat-square)](LICENSE)
 
 
-**Block ads, trackers, malware & protect your privacy â€” all in one powerful extension.**
+**Block ads, trackers, malware & protect your privacy — all in one powerful extension.**
 
 [Features](#features)  [Installation](#installation)  [Usage](#usage)  [Privacy](#privacy--security)  [Contributing](#contributing)
 
@@ -40,25 +40,25 @@
 
 **BlockForge** is a next-generation browser extension that combines powerful ad blocking, comprehensive privacy protection, and advanced threat detection into a single, lightweight solution. Built on Chrome''s Manifest V3 architecture, it leverages the latest web technologies to provide maximum protection with minimal performance impact.
 
-Unlike traditional blockers, BlockForge goes beyond simple filter lists â€” it actively protects you from fingerprinting, blocks malicious scripts, and uses AI-powered detection to identify emerging threats in real-time.
+Unlike traditional blockers, BlockForge goes beyond simple filter lists — it actively protects you from fingerprinting, blocks malicious scripts, and uses AI-powered detection to identify emerging threats in real-time.
 
 ```mermaid
 graph TD
-    subgraph Browser ["🌐 Browser Environment"]
+    subgraph Browser
         A[Web Page Load]
     end
 
-    subgraph Network ["🛡️ Network Firewall (DNR)"]
-        B{Rule Match?}
-        C[❌ Block Connection]
-        D[✅ Allow Connection]
+    subgraph Network
+        B[Rule Match]
+        C[Block Connection]
+        D[Allow Connection]
     end
 
-    subgraph DOM ["🧠 BlockForge Content Engine"]
+    subgraph DOM
         E[Inject Payload]
-        F[👁️ Cosmetic Filtering]
-        G[🚫 Popup Defuser]
-        H[🎭 Anti-Fingerprinting]
+        F[Cosmetic Filtering]
+        G[Popup Defuser]
+        H[Anti-Fingerprinting]
     end
 
     A -->|Outbound Requests| B
@@ -85,15 +85,15 @@ graph TD
 ### Why BlockForge?
 
 -  **763+ built-in blocking rules** across ads, trackers, miners, and malware
--  **Over-The-Air (OTA) Updates** â€” live syncing of massive dynamic blocklists
--  **100% local** â€” no servers, no telemetry, no data collection
--  **Lightweight & fast** â€” uses native Chrome APIs for optimal performance
--  **Privacy-first** â€” comprehensive anti-fingerprinting protection
--  **Beautiful UI** â€” modern glassmorphism design with dark mode
--  **Live Network Log** â€” see every allowed & blocked connection in real-time
--  **Threat Severity Engine** â€” heuristic-based threat classification
--  **Advanced Connection Monitor** â€” firewall-level control over all network requests
--  **YouTube ad blocking** â€” automatic skipping and muting of video ads
+-  **Over-The-Air (OTA) Updates** — live syncing of massive dynamic blocklists
+-  **100% local** — no servers, no telemetry, no data collection
+-  **Lightweight & fast** — uses native Chrome APIs for optimal performance
+-  **Privacy-first** — comprehensive anti-fingerprinting protection
+-  **Beautiful UI** — modern glassmorphism design with dark mode
+-  **Live Network Log** — see every allowed & blocked connection in real-time
+-  **Threat Severity Engine** — heuristic-based threat classification
+-  **Advanced Connection Monitor** — firewall-level control over all network requests
+-  **YouTube ad blocking** — automatic skipping and muting of video ads
 
 ---
 
