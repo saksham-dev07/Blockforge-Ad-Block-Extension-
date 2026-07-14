@@ -268,27 +268,29 @@ Click the BlockForge icon in your toolbar to access quick controls via our newly
 - **Access Settings**: Open full configuration panel
 - **View Dashboard**: Detailed analytics and charts
 
-### Settings Page
+### Settings Dashboard
 
-Right-click the extension icon  **Options** (or click  in popup):
+Right-click the extension icon → **Options** (or click ⚙ in popup) to open the full-page settings dashboard:
 
-#### General Settings
-```
-Protection Level:   Minimal   Moderate   Aggressive
-Auto-Update Rules:  Enabled
-Show Notifications:  Enabled (on threat detection)
-```
+| Tab | Description |
+|-----|-------------|
+| **General** | Master on/off switch, badge count toggle, notifications, and theme (Auto/Dark/Light) |
+| **Blocking** | Protection level cards (Minimal / Moderate / Aggressive) and per-category toggles (Ads, Trackers, Social, Miners, Malware) |
+| **Privacy** | Fingerprint protection toggles — Canvas, WebGL, Audio, WebRTC, Battery API, Cookie auto-delete, and tracking parameter stripping |
+| **Filter Lists** | View built-in filter lists, add custom filter list URLs, and update all lists |
+| **Whitelist** | Add sites where protection is disabled |
+| **Blacklist** | Add domains to always block |
+| **Custom Rules** | Write your own blocking rules using AdBlock/uBlock syntax |
+| **Advanced** | Lazy loading, filter caching, statistics retention, and Danger Zone (reset stats/data/defaults) |
+| **Updates** | **OTA Filter Sync** — toggle automatic 24-hour blocklist updates from the BlockForge cloud repo, force manual sync, view active OTA rule count, and clear downloaded rules |
+| **About** | Version info, lifetime stats, privacy policy, and links |
 
-#### Privacy Protection
+#### OTA Updates (Over-The-Air)
 ```
- Canvas Fingerprint Protection
- WebGL Fingerprint Protection
- Audio Fingerprint Protection
- Font Enumeration Protection
- WebRTC Leak Protection
- User-Agent Randomization
- Referrer Spoofing
- Battery API Blocking
+✅ Enable OTA Updates     — auto-download latest blocklists every 24 hours
+📡 Sync Now               — force an immediate update
+🗑️ Clear OTA Rules        — purge all downloaded dynamic rules
+📊 Status Card            — live view of sync status, rule count, and source
 ```
 
 #### Custom Rules
