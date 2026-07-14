@@ -946,6 +946,77 @@ body {
 }
 
 /* ============================================================================
+   OTA UPDATES
+   ============================================================================ */
+
+.ota-status-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  margin-top: 16px;
+}
+
+.ota-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.ota-status-row:last-child {
+  border-bottom: none;
+}
+
+.ota-status-label {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.ota-status-value {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.ota-source {
+  color: var(--primary-light);
+  font-size: 12px;
+}
+
+.ota-status-value.ota-synced {
+  color: #34d399;
+}
+
+.ota-status-value.ota-syncing {
+  color: var(--warning);
+  animation: otaPulse 1.5s ease-in-out infinite;
+}
+
+.ota-status-value.ota-error {
+  color: var(--danger);
+}
+
+@keyframes otaPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.ota-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.ota-actions .btn-primary,
+.ota-actions .btn-danger {
+  flex: 1;
+}
+
+/* ============================================================================
    SCROLLBAR
    ============================================================================ */
 

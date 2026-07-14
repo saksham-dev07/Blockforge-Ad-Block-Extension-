@@ -64,6 +64,10 @@
           <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg></span>
           <span class="nav-text">Advanced</span>
         </a>
+        <a href="#updates" class="nav-item" data-section="updates">
+          <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></span>
+          <span class="nav-text">Updates</span>
+        </a>
         <a href="#about" class="nav-item" data-section="about">
           <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></span>
           <span class="nav-text">About</span>
@@ -497,6 +501,62 @@ example.com##.ad-container"></textarea>
             <button class="btn-danger" id="resetStatsBtn">Reset Statistics</button>
             <button class="btn-danger" id="clearDataBtn">Clear All Data</button>
             <button class="btn-danger" id="resetSettingsBtn">Reset to Defaults</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Updates Section -->
+      <section id="updates" class="settings-section">
+        <h1 class="section-title">Over-The-Air Updates</h1>
+        <p class="section-description">Keep your blocklists up-to-date with massive community filter lists</p>
+        
+        <div class="settings-group">
+          <h2 class="group-title">OTA Filter Sync</h2>
+          
+          <div class="setting-item">
+            <div class="setting-info">
+              <h3 class="setting-name">Enable OTA Updates</h3>
+              <p class="setting-description">Automatically download and apply the latest blocklist rules from the BlockForge cloud repository every 24 hours</p>
+            </div>
+            <label class="toggle-switch" for="settingOTAEnabled"><input type="checkbox" id="settingOTAEnabled" title="Toggle setting">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <div class="ota-status-card" id="otaStatusCard">
+            <div class="ota-status-row">
+              <span class="ota-status-label">Status</span>
+              <span class="ota-status-value" id="otaStatus">Disabled</span>
+            </div>
+            <div class="ota-status-row">
+              <span class="ota-status-label">Last Synced</span>
+              <span class="ota-status-value" id="otaLastSync">Never</span>
+            </div>
+            <div class="ota-status-row">
+              <span class="ota-status-label">OTA Rules Active</span>
+              <span class="ota-status-value" id="otaRuleCount">0</span>
+            </div>
+            <div class="ota-status-row">
+              <span class="ota-status-label">Source</span>
+              <span class="ota-status-value ota-source">github.com/saksham-dev07/blockforge</span>
+            </div>
+          </div>
+          
+          <div class="ota-actions">
+            <button class="btn-primary" id="forceOTAUpdateBtn">
+              <span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></span> Sync Now
+            </button>
+            <button class="btn-danger" id="clearOTARulesBtn">Clear OTA Rules</button>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h2 class="group-title">How It Works</h2>
+          <div class="privacy-info">
+            <p><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> BlockForge fetches updated blocklist rules from a public GitHub repository</p>
+            <p><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Rules are applied as Dynamic DNR rules alongside your static blocklists</p>
+            <p><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> No personal data is sent — this is a simple, anonymous GET request</p>
+            <p><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Auto-syncs every 24 hours to catch newly discovered ad domains</p>
           </div>
         </div>
       </section>

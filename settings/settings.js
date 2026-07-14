@@ -127,6 +127,10 @@ function updateUI() {
   setToggle('settingCacheFilters', settings.cacheFilters !== false);
   setSelect('settingStatsRetention', String(settings.statsRetention || 30));
   
+  // OTA settings
+  setToggle('settingOTAEnabled', settings.otaEnabled === true);
+  loadOTAStatus();
+  
   // Render lists
   renderFilterLists();
   renderWhitelist();
@@ -233,6 +237,15 @@ function setupEventListeners() {
     e.preventDefault();
     chrome.tabs.create({ url: chrome.runtime.getURL('dashboard/dashboard.html') });
   });
+  
+  // OTA actions
+  document.getElementById('forceOTAUpdateBtn')?.addEventListener('click', forceOTASync);
+  document.getElementById('clearOTARulesBtn')?.addEventListener('click', clearOTARules);
+  
+  // OTA toggle watcher — refresh status card when toggled
+  document.getElementById('settingOTAEnabled')?.addEventListener('change', (e) => {
+    setTimeout(loadOTAStatus, 500);
+  });
 }
 
 /**
@@ -259,7 +272,8 @@ function setupToggleListeners() {
     'settingAIDetection': 'aiDetection',
     'settingAILearning': 'aiLearning',
     'settingLazyLoad': 'lazyLoad',
-    'settingCacheFilters': 'cacheFilters'
+    'settingCacheFilters': 'cacheFilters',
+    'settingOTAEnabled': 'otaEnabled'
   };
   
   for (const [elementId, settingKey] of Object.entries(toggleMappings)) {
@@ -943,4 +957,128 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+// ============================================================================
+// OTA UPDATES
+// ============================================================================
+
+/**
+ * Load and display the current OTA status
+ */
+async function loadOTAStatus() {
+  const statusEl = document.getElementById('otaStatus');
+  const lastSyncEl = document.getElementById('otaLastSync');
+  const ruleCountEl = document.getElementById('otaRuleCount');
+  
+  if (!statusEl) return;
+  
+  try {
+    // Get OTA metadata from storage
+    const data = await chrome.storage.local.get(['lastOTAUpdate', 'otaRuleCount', 'settings']);
+    const currentSettings = data.settings || settings;
+    const lastUpdate = data.lastOTAUpdate || 0;
+    const ruleCount = data.otaRuleCount || 0;
+    
+    if (!currentSettings.otaEnabled) {
+      statusEl.textContent = 'Disabled';
+      statusEl.className = 'ota-status-value';
+      lastSyncEl.textContent = 'Never';
+      ruleCountEl.textContent = '0';
+      return;
+    }
+    
+    if (lastUpdate > 0) {
+      statusEl.textContent = 'Active';
+      statusEl.className = 'ota-status-value ota-synced';
+      lastSyncEl.textContent = new Date(lastUpdate).toLocaleString();
+    } else {
+      statusEl.textContent = 'Waiting for first sync';
+      statusEl.className = 'ota-status-value ota-syncing';
+      lastSyncEl.textContent = 'Never';
+    }
+    
+    // Count active OTA dynamic rules (IDs 600000+)
+    const dynamicRules = await chrome.declarativeNetRequest.getDynamicRules();
+    const otaCount = dynamicRules.filter(r => r.id >= 600000 && r.id < 630000).length;
+    ruleCountEl.textContent = otaCount.toLocaleString();
+    
+    // Persist for quick access
+    if (otaCount !== ruleCount) {
+      await chrome.storage.local.set({ otaRuleCount: otaCount });
+    }
+  } catch (error) {
+    console.error('Failed to load OTA status:', error);
+    statusEl.textContent = 'Error';
+    statusEl.className = 'ota-status-value ota-error';
+  }
+}
+
+/**
+ * Force an immediate OTA sync
+ */
+async function forceOTASync() {
+  const statusEl = document.getElementById('otaStatus');
+  const btn = document.getElementById('forceOTAUpdateBtn');
+  
+  // Temporarily enable OTA if it's off
+  if (!settings.otaEnabled) {
+    settings.otaEnabled = true;
+    setToggle('settingOTAEnabled', true);
+    await safeSendMessage({ type: 'UPDATE_SETTINGS', settings: { otaEnabled: true } });
+  }
+  
+  // Show syncing state
+  statusEl.textContent = 'Syncing...';
+  statusEl.className = 'ota-status-value ota-syncing';
+  btn.disabled = true;
+  btn.textContent = 'Syncing...';
+  
+  try {
+    const response = await safeSendMessage({ type: 'FORCE_OTA_UPDATE' });
+    
+    if (response?.success) {
+      showToast('OTA rules updated successfully!');
+    } else {
+      showToast('OTA sync failed: ' + (response?.error || 'Unknown error'));
+    }
+  } catch (error) {
+    showToast('OTA sync failed: ' + error.message);
+  }
+  
+  // Restore button
+  btn.disabled = false;
+  btn.innerHTML = '<span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></span> Sync Now';
+  
+  // Refresh status card
+  setTimeout(loadOTAStatus, 500);
+}
+
+/**
+ * Clear all OTA dynamic rules
+ */
+async function clearOTARules() {
+  if (!confirm('This will remove all OTA-downloaded rules. Are you sure?')) return;
+  
+  try {
+    // Remove all dynamic rules in the OTA range
+    const dynamicRules = await chrome.declarativeNetRequest.getDynamicRules();
+    const otaRuleIds = dynamicRules
+      .filter(r => r.id >= 600000 && r.id < 630000)
+      .map(r => r.id);
+    
+    if (otaRuleIds.length > 0) {
+      await chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: otaRuleIds
+      });
+    }
+    
+    await chrome.storage.local.set({ lastOTAUpdate: 0, otaRuleCount: 0 });
+    
+    showToast(`Cleared ${otaRuleIds.length} OTA rules`);
+    loadOTAStatus();
+  } catch (error) {
+    console.error('Failed to clear OTA rules:', error);
+    showToast('Failed to clear OTA rules');
+  }
+}
 

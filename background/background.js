@@ -697,6 +697,16 @@ async function handleMessage(message, sender) {
       if (otaJustEnabled) checkForOTAUpdates(true);
       return { success: true };
       
+    case 'forceOtaUpdate':
+    case 'FORCE_OTA_UPDATE': {
+      try {
+        await checkForOTAUpdates(true);
+        return { success: true };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    }
+      
     case 'getStatistics':
       const statsData = await chrome.storage.local.get(['statistics', 'dailyStats', 'blockLog']);
       return {
