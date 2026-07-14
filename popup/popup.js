@@ -91,6 +91,17 @@ async function loadSiteData() {
     const isWhitelisted = whitelist.includes(currentHostname);
     updateSiteStatus(isWhitelisted);
     
+    // Update settings toggles
+    ['Ads', 'Trackers', 'Miners', 'Fingerprint', 'OTA'].forEach(setting => {
+      const toggle = document.getElementById(`toggle${setting}`);
+      if (toggle) {
+        let key = `block${setting}`;
+        if (setting === 'Fingerprint') key = 'antiFingerprint';
+        if (setting === 'OTA') key = 'otaEnabled';
+        if (settings[key] !== undefined) toggle.checked = settings[key];
+      }
+    });
+    
     // Load site exceptions
     const exceptionsKey = `exceptions_${currentHostname}`;
     const data = await chrome.storage.local.get([exceptionsKey]);
@@ -450,11 +461,14 @@ function setupEventListeners() {
   });
   
   // Settings toggles
-  ['Ads', 'Trackers', 'Miners', 'Fingerprint'].forEach(setting => {
+  ['Ads', 'Trackers', 'Miners', 'Fingerprint', 'OTA'].forEach(setting => {
     const toggle = document.getElementById(`toggle${setting}`);
     if (toggle) {
       toggle.addEventListener('change', async (e) => {
-        const key = setting === 'Fingerprint' ? 'antiFingerprint' : `block${setting}`;
+        let key = `block${setting}`;
+        if (setting === 'Fingerprint') key = 'antiFingerprint';
+        if (setting === 'OTA') key = 'otaEnabled';
+        
         await safeSendMessage({
           action: 'updateSettings',
           settings: { [key]: e.target.checked }

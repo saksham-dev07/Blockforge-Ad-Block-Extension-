@@ -19,6 +19,7 @@ function getDefaultSettings() {
     antiFingerprint: true,
     httpsUpgrade: true,
     blockThirdPartyCookies: true,
+    otaEnabled: false,
     customFilters: [],
     whitelist: []
   };
@@ -49,6 +50,9 @@ async function initialize() {
     
     // Update declarative rules based on settings
     await updateRules();
+    
+    // Check for OTA updates on startup
+    checkForOTAUpdates();
     
     // Update badge
     await updateBadge();
@@ -532,9 +536,11 @@ async function handleMessage(message, sender) {
       return { settings };
       
     case 'updateSettings':
+      const otaJustEnabled = message.settings.otaEnabled === true && !settings.otaEnabled;
       settings = { ...settings, ...message.settings };
       await chrome.storage.local.set({ settings });
       await updateRules();
+      if (otaJustEnabled) checkForOTAUpdates(true);
       return { success: true };
       
     case 'getStatistics':
@@ -923,6 +929,78 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 
 // Initialize on startup
 initialize();
+
+// ==========================================
+// OTA UPDATES
+// ==========================================
+const OTA_URL = "https://raw.githubusercontent.com/saksham-dev07/blockforge/main/ota-rules.json";
+const OTA_ALARM_NAME = "checkOTAUpdates";
+const OTA_INTERVAL_MINUTES = 24 * 60; // 24 hours
+
+async function checkForOTAUpdates(force = false) {
+  if (!settings.otaEnabled) return;
+
+  try {
+    const data = await chrome.storage.local.get(['lastOTAUpdate']);
+    const lastUpdate = data.lastOTAUpdate || 0;
+    const now = Date.now();
+    
+    // Only check if it's been more than 24 hours, or if forced
+    if (!force && now - lastUpdate < OTA_INTERVAL_MINUTES * 60 * 1000) {
+      setupOTAAlarm();
+      return;
+    }
+    
+    console.log('[BlockForge] Checking for OTA filter updates...');
+    
+    // Fetch rules from remote
+    const response = await fetch(OTA_URL, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const otaRules = await response.json();
+    if (!Array.isArray(otaRules)) throw new Error('Invalid OTA rules format');
+    
+    // Validate rules
+    const validRules = otaRules.filter(r => r && r.action && r.condition);
+    if (validRules.length === 0) return;
+    
+    // Apply rules to DNR (IDs 600000 - 629000)
+    const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
+    const oldOtaRuleIds = existingRules
+      .filter(r => r.id >= 600000 && r.id < 630000)
+      .map(r => r.id);
+      
+    // Enforce ID limits on new rules
+    const formattedRules = validRules.map((rule, index) => {
+      rule.id = 600000 + index;
+      return rule;
+    }).slice(0, 29000);
+    
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: oldOtaRuleIds,
+      addRules: formattedRules
+    });
+    
+    await chrome.storage.local.set({ lastOTAUpdate: now });
+    console.log(`[BlockForge] Applied ${formattedRules.length} OTA rules successfully.`);
+    
+    setupOTAAlarm();
+  } catch (error) {
+    console.error('[BlockForge] OTA Update failed:', error);
+    // Retry in an hour on failure
+    chrome.alarms.create(OTA_ALARM_NAME, { delayInMinutes: 60 });
+  }
+}
+
+function setupOTAAlarm() {
+  chrome.alarms.create(OTA_ALARM_NAME, { periodInMinutes: OTA_INTERVAL_MINUTES });
+}
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === OTA_ALARM_NAME) {
+    checkForOTAUpdates(true);
+  }
+});
 
 console.log('[BlockForge] BlockForge service worker loaded');
 
