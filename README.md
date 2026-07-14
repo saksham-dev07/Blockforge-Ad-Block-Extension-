@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
 
 # BlockForge
 
@@ -9,7 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-FFC107?style=flat-square)](LICENSE)
 
 
-**Block ads, trackers, malware & protect your privacy — all in one powerful extension.**
+**Block ads, trackers, malware & protect your privacy â€” all in one powerful extension.**
 
 [Features](#features)  [Installation](#installation)  [Usage](#usage)  [Privacy](#privacy--security)  [Contributing](#contributing)
 
@@ -17,7 +17,7 @@
 
 </div>
 
-## Table of Contents
+## 📑 Table of Contents
 
 - [Overview](#overview)
 - [Features](#features)
@@ -36,28 +36,28 @@
 
 ---
 
-## Overview
+## 👁️ Overview
 
 **BlockForge** is a next-generation browser extension that combines powerful ad blocking, comprehensive privacy protection, and advanced threat detection into a single, lightweight solution. Built on Chrome''s Manifest V3 architecture, it leverages the latest web technologies to provide maximum protection with minimal performance impact.
 
-Unlike traditional blockers, BlockForge goes beyond simple filter lists — it actively protects you from fingerprinting, blocks malicious scripts, and uses AI-powered detection to identify emerging threats in real-time.
+Unlike traditional blockers, BlockForge goes beyond simple filter lists â€” it actively protects you from fingerprinting, blocks malicious scripts, and uses AI-powered detection to identify emerging threats in real-time.
 
 ### Why BlockForge?
 
 -  **763+ built-in blocking rules** across ads, trackers, miners, and malware
--  **Over-The-Air (OTA) Updates** — live syncing of massive dynamic blocklists
--  **100% local** — no servers, no telemetry, no data collection
--  **Lightweight & fast** — uses native Chrome APIs for optimal performance
--  **Privacy-first** — comprehensive anti-fingerprinting protection
--  **Beautiful UI** — modern glassmorphism design with dark mode
--  **Live Network Log** — see every allowed & blocked connection in real-time
--  **Threat Severity Engine** — heuristic-based threat classification
--  **Advanced Connection Monitor** — firewall-level control over all network requests
--  **YouTube ad blocking** — automatic skipping and muting of video ads
+-  **Over-The-Air (OTA) Updates** â€” live syncing of massive dynamic blocklists
+-  **100% local** â€” no servers, no telemetry, no data collection
+-  **Lightweight & fast** â€” uses native Chrome APIs for optimal performance
+-  **Privacy-first** â€” comprehensive anti-fingerprinting protection
+-  **Beautiful UI** â€” modern glassmorphism design with dark mode
+-  **Live Network Log** â€” see every allowed & blocked connection in real-time
+-  **Threat Severity Engine** â€” heuristic-based threat classification
+-  **Advanced Connection Monitor** â€” firewall-level control over all network requests
+-  **YouTube ad blocking** â€” automatic skipping and muting of video ads
 
 ---
 
-## Features
+## ✨ Features
 
 ### Multi-Layer Blocking System
 
@@ -151,7 +151,7 @@ Specialized YouTube protection:
 
 ---
 
-## Installation
+## 🚀 Installation
 
 ### Option 1: Chrome Web Store (Recommended)
 
@@ -204,7 +204,7 @@ Or download the ZIP file and extract it.
 
 ---
 
-## Usage
+## 💡 Usage
 
 ### Quick Start
 
@@ -306,7 +306,7 @@ Access from popup  **Dashboard** or right-click  **Options**  **Dashboard**:
 
 ---
 
-## Configuration
+## ⚙️ Configuration
 
 ### Blocking Levels Explained
 
@@ -391,7 +391,9 @@ Each privacy feature can be toggled independently:
 
 ---
 
-## Project Structure
+<details>
+<summary><h2>📁 Project Structure</h2></summary>
+
 
 ```
 browser extension/
@@ -483,7 +485,11 @@ browser extension/
 
 ---
 
-## Technical Details
+</details>
+
+<details>
+<summary><h2>🛠️ Technical Details</h2></summary>
+
 
 ### Manifest V3 Architecture
 
@@ -593,7 +599,9 @@ BlockForge uses Chrome''s local storage with the following structure:
 
 ---
 
-## Privacy & Security
+</details>
+
+## 🛡️ Privacy & Security
 
 ### Privacy Commitments
 
@@ -646,7 +654,7 @@ The entire codebase is available for inspection:
 
 ---
 
-## Performance
+## ⚡ Performance
 
 ### Benchmarks
 
@@ -678,7 +686,9 @@ Based on average user statistics:
 
 ---
 
-## Troubleshooting
+<details>
+<summary><h2>🔧 Troubleshooting</h2></summary>
+
 
 ### Common Issues & Solutions
 
@@ -755,7 +765,11 @@ Found a bug? Please report it!
 
 ---
 
-## Development
+</details>
+
+<details>
+<summary><h2>💻 Development</h2></summary>
+
 
 ### Getting Started
 
@@ -860,7 +874,9 @@ F12  Network tab  Filter by "Blocked" status
 
 ---
 
-## Contributing
+</details>
+
+## 🤝 Contributing
 
 Contributions are **highly welcome**! Whether it''s bug reports, feature requests, or pull requests, we appreciate all help.
 
@@ -928,7 +944,7 @@ Contributions are **highly welcome**! Whether it''s bug reports, feature request
 
 ---
 
-## License
+## 📄 License
 
 ```
 MIT License
@@ -962,7 +978,7 @@ SOFTWARE.
 
 ---
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
 BlockForge wouldn''t be possible without these amazing resources:
 
@@ -1023,3 +1039,4 @@ BlockForge wouldn''t be possible without these amazing resources:
 [ Back to Top](#blockforge)
 
 </div>
+
