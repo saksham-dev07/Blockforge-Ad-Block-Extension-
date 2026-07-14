@@ -65,6 +65,59 @@ async function initialize() {
   }
 }
 
+// ============================================================================
+// TAB LIFECYCLE INTERCEPTOR ($popup / $popunder support)
+// ============================================================================
+
+let popupRulesCache = [];
+
+async function updatePopupRules() {
+  const customData = await chrome.storage.local.get(['customRules']);
+  const customRules = customData.customRules || [];
+  popupRulesCache = customRules
+    .filter(r => r.pattern && (r.pattern.includes('$popup') || r.pattern.includes('$popunder')))
+    .map(r => {
+      // Extract the domain or path from rules like ||example.com/AdHandler.aspx?$popunder
+      const match = r.pattern.match(/\|\|(.*?)\$/);
+      return match ? match[1] : null;
+    })
+    .filter(d => d);
+}
+
+// Initialize popup rules
+updatePopupRules();
+
+// Re-parse when storage changes
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  if (namespace === 'local' && changes.customRules) {
+    updatePopupRules();
+  }
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.url && popupRulesCache.length > 0) {
+    try {
+      const urlStr = changeInfo.url;
+      // Also close data: and about:blank tabs if they are spawned dynamically, 
+      // but only if we have strict popup blocking rules enabled and the URL matches a blocked pattern
+      
+      const shouldClose = popupRulesCache.some(pattern => {
+        // Simple string inclusion check for URL matching
+        return urlStr.includes(pattern);
+      });
+      
+      if (shouldClose) {
+        chrome.tabs.remove(tabId).catch(() => {});
+        console.log(`[BlockForge] Automatically closed popup tab ${tabId} matching $popup rule: ${urlStr}`);
+      }
+    } catch (e) {
+      // Ignore URL parsing errors
+    }
+  }
+});
+
+
+
 // Update declarative net request rules based on settings
 async function updateRules() {
   const enabledRulesets = [];
@@ -504,6 +557,33 @@ async function handleMessage(message, sender) {
               return x - Math.floor(x);
             }
             
+            // Popup defuser (window.open interceptor)
+            if (typeof window.open === 'function') {
+              const originalWindowOpen = window.open;
+              let userInteracted = false;
+              
+              // Only allow window.open shortly after a real user interaction
+              document.addEventListener('click', () => {
+                userInteracted = true;
+                setTimeout(() => userInteracted = false, 1500);
+              }, true);
+              
+              document.addEventListener('keydown', () => {
+                userInteracted = true;
+                setTimeout(() => userInteracted = false, 1500);
+              }, true);
+              
+              window.open = function(url, target, features) {
+                const urlStr = (url || '').toString();
+                // Block if strictly no user interaction
+                if (!userInteracted) {
+                  console.warn('[BlockForge] Blocked un-trusted auto-popup without user interaction to:', urlStr);
+                  return null;
+                }
+                return originalWindowOpen.apply(this, arguments);
+              };
+            }
+            
             // Canvas fingerprinting protection
             if (HTMLCanvasElement.prototype.toDataURL) {
               const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
@@ -567,12 +647,27 @@ async function handleMessage(message, sender) {
       const tabUrl = sender.tab?.url || '';
       const csrHostname = message.hostname || (tabUrl ? new URL(tabUrl).hostname : '');
       const isWhitelisted = (settings.whitelist || []).includes(csrHostname);
+      
+      // Parse $ghide exceptions for anti-adblock bypass
+      const customData = await chrome.storage.local.get(['customRules']);
+      const customRules = customData.customRules || [];
+      const ghideExceptions = customRules
+        .filter(r => r.pattern && r.pattern.includes('$ghide'))
+        .map(r => {
+           const match = r.pattern.match(/@@\|\|(.*?)(\^|\$)/);
+           return match ? match[1] : null;
+        })
+        .filter(d => d);
+      
+      const disableCosmetic = ghideExceptions.some(d => csrHostname === d || csrHostname.endsWith('.' + d));
+
       return {
         success: true,
         config: {
           enabled: isEnabled,
           settings: settings,
-          isWhitelisted: isWhitelisted
+          isWhitelisted: isWhitelisted,
+          disableCosmetic: disableCosmetic
         }
       };
     }
@@ -1130,4 +1225,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 console.log('[BlockForge] BlockForge service worker loaded');
+
+// Start extension
+initialize();
 

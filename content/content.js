@@ -36,7 +36,8 @@
     enabled: true,
     settings: {},
     hostname: window.location.hostname,
-    isWhitelisted: false
+    isWhitelisted: false,
+    disableCosmetic: false
   };
   
   const pageStats = {
@@ -162,6 +163,7 @@
           config.enabled = response.config.enabled !== false;
           config.settings = response.config.settings || {};
           config.isWhitelisted = response.config.isWhitelisted || false;
+          config.disableCosmetic = response.config.disableCosmetic || false;
         }
         startProtection();
       });
@@ -191,7 +193,11 @@
     injectProtectionScript();
     
     // Inject CSS cosmetic filters immediately (pre-render hiding)
-    injectCosmeticStyles();
+    if (!config.disableCosmetic) {
+      injectCosmeticStyles();
+    } else {
+      console.log('[BlockForge] Generic cosmetic filtering disabled by $ghide exception');
+    }
     
     // YouTube-specific ad blocker
     if (isYouTube()) {
@@ -204,11 +210,13 @@
         removeAdElements();
         setupMutationObserver();
         analyzePageContent();
+        setupClickInterceptor();
       });
     } else {
       removeAdElements();
       setupMutationObserver();
       analyzePageContent();
+      setupClickInterceptor();
     }
   }
   
@@ -1072,6 +1080,7 @@
         .ad-header, .ad-footer, .ad-sidebar, .ad-content,
         .GoogleAd, .googleAd, .google-ad, .google_ad,
         #GoogleAd, #googleAd, #google-ad, #google_ad,
+        #ADSLOT_1,
         .adwords, .ad-words, .ad_words, .AdWords,
         .sidebar-ad, .sidebar_ad, .sidebarad,
         .footer-ad, .footer_ad, .footerad,
@@ -1089,6 +1098,15 @@
         .ad-frame, .ad_frame, .adframe,
         .ad-label, .ad_label, .adlabel,
         .adtag, .ad-tag, .ad_tag,
+        
+        /* Programmatic & Native Ad Networks */
+        .trc_related_container, .trc_rbox_container, [id^="taboola-"],
+        .OUTBRAIN, .ob-widget, .ob-smartfeed, [id^="outbrain_widget"],
+        [id^="criteo-"], .criteo-widget,
+        .rc-widget, [id^="revcontent-"],
+        .nativo-widget, .ntv-ad, [id^="nativo-"],
+        .admob-ad, [id^="admob-"],
+        
         div[style*="width: 300px"][style*="height: 250px"],
         div[style*="width: 728px"][style*="height: 90px"],
         div[style*="width: 160px"][style*="height: 600px"],
@@ -1148,6 +1166,40 @@
     }
   }
   
+  // ============================================================================
+  // CLICK INTERCEPTOR (Popunder/Clickjacking Blocker)
+  // ============================================================================
+  
+  function setupClickInterceptor() {
+    if (!config.settings.blockAnnoyances) return;
+    
+    document.addEventListener('click', (e) => {
+      const el = e.target;
+      const tagName = el.tagName;
+      if (tagName === 'DIV' || tagName === 'A' || tagName === 'SPAN' || tagName === 'IFRAME' || tagName === 'OBJECT' || tagName === 'EMBED') {
+        try {
+          const style = window.getComputedStyle(el);
+          const rect = el.getBoundingClientRect();
+          
+          // Detect if element is covering a massive portion of the screen
+          const isCoveringScreen = rect.width > window.innerWidth * 0.9 && rect.height > window.innerHeight * 0.9;
+          // Detect if it is invisible or acting as a high z-index overlay trap
+          const isInvisibleOverlay = style.opacity === '0' || style.backgroundColor === 'rgba(0, 0, 0, 0)' || parseInt(style.zIndex, 10) > 9000;
+          
+          if (isCoveringScreen && isInvisibleOverlay) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.warn('[BlockForge] Intercepted click on invisible overlay/popunder. Destroying trap.');
+            el.remove();
+            return false; // Prevent default action
+          }
+        } catch (err) {
+          // Ignore style errors
+        }
+      }
+    }, true); // Use capture phase to intercept BEFORE the site's own listeners
+  }
+
   // ============================================================================
   // CONTENT ANALYSIS
   // ============================================================================
