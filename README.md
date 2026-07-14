@@ -44,8 +44,8 @@ Unlike traditional blockers, BlockForge goes beyond simple filter lists — it a
 
 ### Why BlockForge?
 
--  **738+ built-in blocking rules** across ads, trackers, miners, and malware
--  **Zero-configuration** — works perfectly out of the box
+-  **763+ built-in blocking rules** across ads, trackers, miners, and malware
+-  **Over-The-Air (OTA) Updates** — live syncing of massive dynamic blocklists
 -  **100% local** — no servers, no telemetry, no data collection
 -  **Lightweight & fast** — uses native Chrome APIs for optimal performance
 -  **Privacy-first** — comprehensive anti-fingerprinting protection
@@ -65,12 +65,12 @@ BlockForge employs a sophisticated multi-layer approach to content blocking:
 
 | Category | Rules | Description |
 |----------|-------|-------------|
-| **Ads** | 371 | Display ads, video ads, pop-ups, banners, sponsored content |
-| **Trackers** | 355 | Analytics scripts, tracking pixels, social widgets, cross-site trackers |
+| **Ads** | 387 | Display ads, video ads, pop-ups, banners, sponsored content |
+| **Trackers** | 364 | Analytics scripts, tracking pixels, social widgets, cross-site trackers |
 | **Miners** | 10 | Cryptocurrency miners, CPU-intensive scripts |
 | **Malware** | 2 | Known malicious domains, phishing sites |
 
-**Total Protection**: 738 blocking rules
+**Total Protection**: 763 blocking rules
 
 - Uses Chrome''s native `declarativeNetRequest` API for maximum efficiency
 - No DOM manipulation overhead for basic blocking
@@ -86,6 +86,17 @@ Advanced machine learning algorithms identify and block emerging threats:
 - **Zero-Day Protection**: Catches threats that traditional blockers miss
 - **Continuous Learning**: Improves detection accuracy over time
 - **Heuristic Scoring**: Assigns threat levels to unknown domains
+
+### Popup & Popunder Defuser
+
+A sophisticated dual-layered system to crush synthetic and automated tabs:
+- **Tab Lifecycle Interception**: Hooks into Chrome's `tabs.onUpdated` event to physically close spawned tabs matching `$popup` or `$popunder` blocklist directives in milliseconds.
+- **Synthetic Popup Blocking**: Injects a `MAIN` world defuser that overrides `window.open`. It tracks physical user input (clicks/keydowns) and instantly blocks automated, non-interactive popups (like hidden `data:uri` redirects).
+
+### Anti-Adblock Evasion & Cosmetic Engine
+
+- **Dynamic Cosmetic Filtering**: Actively collapses native, programmatic ad grid containers (Taboola, Outbrain, Criteo, RevContent) via injected CSS, maintaining a flawless layout.
+- **Bot Detection Bypass**: Natively parses `$ghide` exemption rules to selectively disable cosmetic filtering on sites employing aggressive anti-bot/anti-adblock fingerprinting (e.g. Adscore).
 
 ### Comprehensive Privacy Suite
 
