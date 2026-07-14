@@ -68,9 +68,9 @@ graph TD
     A -->|DOM Renders| E
     E -->|Injects CSS| F
     E -->|Hooks window.open| G
-    E -->|Spoofs Canvas/WebGL| H
+    E -->|Spoofs Canvas| H
 
-    classDef default fill:#1e1e1e,stroke:#444,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef default fill:#1e1e1e,stroke:#444,stroke-width:2px,color:#fff;
     classDef startNode fill:#4285f4,stroke:#2b5cba,stroke-width:2px,color:#fff;
     classDef blocked fill:#ea4335,stroke:#b31404,stroke-width:2px,color:#fff;
     classDef allowed fill:#34a853,stroke:#1e8e3e,stroke-width:2px,color:#fff;
